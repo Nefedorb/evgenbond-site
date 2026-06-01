@@ -1,0 +1,731 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание сайтов и цифровые услуги для малого и среднего бизнеса</title>
+    <meta name="description" content="Разрабатываю сайты, лендинги и интернет-магазины под ключ. Быстро, современно и с фокусом на результат">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Создание сайтов и цифровые услуги для малого и среднего бизнеса">
+    <meta property="og:description" content="Разрабатываю сайты, лендинги и интернет-магазины под ключ. Быстро, современно и с фокусом на результат">
+    <meta property="og:image" content="https://evgenbond.ru/sharedlink.jpg">
+    <meta property="og:image:secure_url" content="https://evgenbond.ru/sharedlink.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Создание сайтов и цифровые услуги для малого и среднего бизнеса">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Создание сайтов и цифровые услуги для малого и среднего бизнеса">
+    <meta name="twitter:description" content="Разрабатываю сайты, лендинги и интернет-магазины под ключ. Быстро, современно и с фокусом на результат">
+    <meta name="twitter:image" content="https://evgenbond.ru/sharedlink.jpg">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@200;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #F4F4F4;
+            --white: #FFFFFF;
+            --black: #0D0D0D;
+            --brand-red: #C80000;
+            --gray-dark: #333333;
+            --gray-light: #CCCCCC;
+            
+            --border: 1px solid var(--black);
+            --border-thick: 3px solid var(--black);
+            
+            --transition-fast: 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            --transition-slow: 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--black);
+            font-family: 'Archivo', sans-serif;
+            line-height: 1.4;
+            -webkit-font-smoothing: antialiased;
+            padding: 2vw;
+            overflow-x: hidden;
+        }
+
+        ::selection { background: var(--black); color: var(--white); }
+
+        .master-grid {
+            border: var(--border);
+            background: var(--white);
+            max-width: 1800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        h1, h2, h3 { font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; }
+        
+        h1 { font-size: clamp(3rem, 7vw, 7rem); line-height: 0.85; margin-bottom: 20px;}
+        h2 { font-size: clamp(2rem, 4vw, 4rem); line-height: 0.9; }
+        h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        
+        p { font-size: 1.1rem; font-weight: 400; color: var(--gray-dark); }
+        
+        .mono-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-strict {
+            display: inline-flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 25px 30px;
+            background: var(--white);
+            color: var(--black);
+            border: var(--border);
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .btn-strict::after {
+            content: "";
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: var(--brand-red);
+            transition: var(--transition-slow);
+            z-index: 1;
+        }
+
+        .btn-strict:hover::after { left: 0; }
+        .btn-strict:hover { color: var(--white); border-color: var(--brand-red); }
+        .btn-strict span { position: relative; z-index: 2; }
+        
+        .arrow-icon { font-family: 'JetBrains Mono'; transition: var(--transition-fast); position: relative; z-index: 2;}
+        .btn-strict:hover .arrow-icon { transform: translateX(10px); color: var(--white);}
+
+        /* --- БЛОК 1: HERO --- */
+        .hero {
+            display: grid;
+            grid-template-columns: 1.55fr 1.25fr;
+            grid-template-rows: auto auto;
+            border-bottom: var(--border);
+        }
+
+        .hero-title-box {
+            grid-column: 1 / 3;
+            padding: 6vw 4vw;
+            border-bottom: var(--border);
+        }
+
+        .hero-desc-box {
+            padding: 4vw;
+            border-right: var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .hero-copy {
+            margin: 0;
+            color: var(--black);
+            font-family: 'Archivo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            line-height: 1.4;
+            text-transform: none;
+            letter-spacing: normal;
+            text-wrap: pretty;
+            hyphens: none;
+            word-break: normal;
+            overflow-wrap: normal;
+        }
+        .hero-lead-wrap {
+            max-width: min(100%, 90ch);
+        }
+        .hero-lead-wrap + .hero-copy {
+            margin-top: 20px;
+        }
+        .hero-services {
+            margin-top: 32px;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 10px;
+            font-family: 'Archivo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            line-height: 1.4;
+            text-transform: none;
+            letter-spacing: normal;
+            color: var(--black);
+        }
+        .hero-services li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .hero-services li::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background: var(--black);
+            flex-shrink: 0;
+            margin-top: 0.45em;
+        }
+
+        .hero-photo-box {
+            position: relative;
+            background: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            min-height: 0;
+        }
+
+        .hero-photo-box::before {
+            content: ""; position: absolute; top: 20px; left: 20px; width: 15px; height: 15px; border: var(--border-thick);
+        }
+        .hero-photo-box::after {
+            content: "[ IMAGE_SLOT // PROFILE ]"; font-family: 'JetBrains Mono'; font-size: 0.8rem; color: var(--gray-light);
+        }
+        .hero-photo-box.has-photo::before,
+        .hero-photo-box.has-photo::after {
+            display: none;
+        }
+        .hero-photo {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity var(--transition-slow);
+        }
+        .hero-photo.is-hover {
+            opacity: 0;
+        }
+        .hero-photo-box:hover .hero-photo.is-default {
+            opacity: 0;
+        }
+        .hero-photo-box:hover .hero-photo.is-hover {
+            opacity: 1;
+        }
+
+        /* --- БЛОК 2: МАНИФЕСТ --- */
+        .manifesto {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: var(--border);
+        }
+        
+        .manifesto-left { padding: 6vw 4vw; background: var(--black); color: var(--white); }
+        .manifesto-left h2 { color: var(--white); }
+
+        .manifesto-right { padding: 6vw 4vw; display: flex; flex-direction: column; justify-content: center; }
+        .manifesto-right p {
+            margin: 0;
+            color: var(--black);
+            font-family: 'Archivo', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 400;
+            line-height: 1.4;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        .manifesto-right p + p { margin-top: 20px; }
+
+        /* --- БЛОК 3: УСЛУГИ --- */
+        .services-header { padding: 4vw; border-bottom: var(--border); }
+        
+        .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+
+        .service-col {
+            padding: 4vw 2vw; border-right: var(--border); border-bottom: var(--border);
+            transition: var(--transition-fast); position: relative; background: var(--white);
+        }
+        .service-col:last-child { border-right: none; }
+        
+        .service-col:hover { background: var(--black); color: var(--white); }
+        .service-col:hover p { color: var(--gray-light); }
+        .service-col:hover .mono-text { color: var(--white); }
+
+        .service-num { display: inline-block; margin-bottom: 40px; border: 1px solid currentColor; padding: 5px 10px; }
+
+        .service-icon-box {
+            position: absolute; top: 2vw; right: 2vw; font-family: 'JetBrains Mono'; font-size: 1.5rem; transition: var(--transition-fast);
+        }
+        .service-col:hover .service-icon-box { transform: rotate(45deg); }
+
+        /* --- БЛОК 4: ПОРТФОЛИО (НОВАЯ АСИММЕТРИЧНАЯ СЕТКА) --- */
+        .portfolio-header { padding: 4vw; border-bottom: var(--border); }
+        
+        .portfolio-bento {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 3 колонки */
+        }
+
+        .ptf-card {
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+            border-bottom: var(--border);
+            border-right: var(--border);
+            text-decoration: none;
+            color: var(--black);
+            transition: var(--transition-fast);
+        }
+
+        /* Задаем асимметрию: Чередуем широкие и&nbsp;узкие карточки */
+        .ptf-card:nth-child(1) { grid-column: span 2; }
+        .ptf-card:nth-child(2) { grid-column: span 1; border-right: none; }
+        .ptf-card:nth-child(3) { grid-column: span 1; }
+        .ptf-card:nth-child(4) { grid-column: span 2; border-right: none; }
+        .ptf-card:nth-child(5) { grid-column: span 2; }
+        .ptf-card:nth-child(6) { grid-column: span 1; border-right: none; }
+
+        /* Эффект наведения на&nbsp;всю карточку */
+        .ptf-card:hover {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        /* Место под&nbsp;картинку */
+        .ptf-img-slot {
+            width: 100%;
+            aspect-ratio: 16 / 9; /* Пропорция картинки */
+            background: var(--bg-color);
+            border-bottom: var(--border);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+            overflow: hidden;
+        }
+        .ptf-img-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .ptf-img-slot.has-image::before,
+        .ptf-img-slot.has-image::after {
+            display: none;
+        }
+
+        .ptf-img-slot::after {
+            content: "[ IMG_DATA ]";
+            font-family: 'JetBrains Mono';
+            font-size: 0.8rem;
+            color: var(--gray-light);
+            transition: var(--transition-fast);
+        }
+
+        /* Декоративный крестик в&nbsp;углу картинки */
+        .ptf-img-slot::before {
+            content: "+";
+            position: absolute;
+            top: 20px; right: 20px;
+            font-family: 'JetBrains Mono';
+            font-size: 1.5rem;
+            color: var(--black);
+            transition: var(--transition-fast);
+            z-index: 2;
+        }
+
+        /* Инверсия картинки при&nbsp;наведении */
+        .ptf-card:hover .ptf-img-slot {
+            background: var(--gray-dark);
+            border-bottom-color: var(--white);
+        }
+        .ptf-card:hover .ptf-img-slot::before {
+            color: var(--white);
+            transform: rotate(45deg); /* Крестик превращается в&nbsp;Х */
+        }
+        .ptf-card:hover .ptf-img-slot::after { color: var(--gray-dark); }
+
+        /* Текстовая часть карточки */
+        .ptf-info {
+            padding: 30px 3vw;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1; /* Чтобы текст тянулся вниз, если карточка высокая */
+        }
+
+        .ptf-title {
+            font-size: clamp(1.5rem, 2vw, 2.5rem);
+            margin: 15px 0 10px 0;
+            line-height: 1;
+        }
+
+        .ptf-desc {
+            font-size: 1rem;
+            color: var(--gray-dark);
+            transition: var(--transition-fast);
+        }
+
+        .ptf-card:hover .ptf-desc { color: var(--gray-light); }
+        .ptf-card:hover .mono-text { color: var(--gray-light); }
+
+        /* --- БЛОК 5: БЛОГ --- */
+        .blog-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: var(--border);
+        }
+        .blog-panel-left {
+            padding: 6vw 4vw;
+            background: var(--black);
+            color: var(--white);
+            border-right: var(--border);
+        }
+        .blog-panel-left h2,
+        .blog-panel-left p { color: var(--white); }
+        .blog-panel-right {
+            padding: 6vw 4vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 32px;
+            background: var(--white);
+        }
+        .blog-panel-right p { max-width: 60ch; }
+
+        /* --- БЛОК 6: СТАНДАРТЫ --- */
+        .info-panel { display: grid; grid-template-columns: 1fr 1fr; }
+        .info-left { padding: 6vw 4vw; border-right: var(--border); }
+        .info-right { padding: 6vw 4vw; background: var(--bg-color); position: relative; }
+
+        .info-right::before {
+            content: ""; position: absolute; top:0; left:0; width:100%; height:100%;
+            background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 20px);
+            z-index: 0; pointer-events: none;
+        }
+        .info-content { position: relative; z-index: 1; }
+        .info-certs {
+            margin-top: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .info-certs img {
+            width: 100%;
+            height: auto;
+            border: var(--border);
+            display: block;
+        }
+        .info-video { margin-top: 32px; }
+
+        /* --- FOOTER CTA --- */
+        .footer-cta { padding: 8vw 4vw; text-align: center; background: var(--black); color: var(--white); }
+        .footer-cta h2 { color: var(--white); margin-bottom: 40px;}
+        
+        .btn-giant {
+            display: inline-block; background: var(--white); color: var(--black); padding: 30px 80px;
+            font-size: 1.5rem; font-weight: 900; text-transform: uppercase; text-decoration: none;
+            transition: var(--transition-fast); border: 2px solid var(--white);
+        }
+        .btn-giant:hover { background: var(--black); color: var(--white); }
+
+        /* --- АДАПТИВНОСТЬ ДЛЯ&nbsp;ПЛАНШЕТОВ --- */
+        @media (max-width: 1024px) {
+            .hero { display: flex; flex-direction: column; }
+            .hero-title-box, .hero-desc-box, .hero-photo-box { width: 100%; }
+            .hero-desc-box { border-right: none; border-bottom: var(--border); }
+            .hero-photo-box { min-height: 0; aspect-ratio: 1 / 1; border-bottom: var(--border); }
+            
+            .manifesto { grid-template-columns: 1fr; }
+            .blog-panel { grid-template-columns: 1fr; }
+            .blog-panel-left { border-right: none; border-bottom: var(--border); }
+            .info-panel { grid-template-columns: 1fr; }
+            .info-left { border-right: none; border-bottom: var(--border); }
+            
+            /* Сетка портфолио в&nbsp;2 колонки на&nbsp;планшете */
+            .portfolio-bento { grid-template-columns: repeat(2, 1fr); }
+            .ptf-card { grid-column: span 1 !important; border-right: var(--border) !important; }
+            .ptf-card:nth-child(even) { border-right: none !important; }
+        }
+
+        /* --- АДАПТИВНОСТЬ ДЛЯ&nbsp;МОБИЛОК --- */
+        @media (max-width: 768px) {
+            body { padding: 0; }
+            .master-grid { border: none; border-bottom: var(--border);}
+            
+            h1 {
+                font-size: clamp(2.2rem, 12.5vw, 3rem);
+                line-height: 0.92;
+                overflow-wrap: anywhere;
+                word-break: break-word;
+            }
+            h2 { font-size: 2.2rem; }
+            
+            .btn-strict { padding: 20px 25px; font-size: 1.1rem; white-space: nowrap; }
+            
+            .services-grid { grid-template-columns: 1fr; }
+            .service-col { border-right: none; }
+
+            /* Сетка портфолио в&nbsp;1 колонку на&nbsp;мобилках */
+            .portfolio-bento { grid-template-columns: 1fr; }
+            .ptf-card { border-right: none !important; }
+            .info-certs { grid-template-columns: 1fr; }
+            .hero-services { gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a);
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=107739439', 'ym');
+
+        ym(107739439, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/107739439" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+    <div class="master-grid">
+        
+        <!-- БЛОК 1: HERO -->
+        <section class="hero">
+            <div class="hero-title-box">
+                <div class="mono-text" style="margin-bottom: 20px;">[ СИСТЕМНАЯ ИНТЕГРАЦИЯ // V 2.0 ]</div>
+                <h1>ЦИФРОВОЙ ДВИГАТЕЛЬ<br>ДЛЯ&nbsp;ВАШЕГО БИЗНЕСА</h1>
+            </div>
+            
+            <div class="hero-desc-box">
+                <div>
+                    <div class="hero-lead-wrap">
+                        <p class="hero-copy">Вся работа над&nbsp;проектом в&nbsp;одних руках: от&nbsp;создания премиального интернет&#8209;магазина&nbsp;до&nbsp;настройки рекламы в&nbsp;Яндекс Директ</p>
+                    </div>
+                    <p class="hero-copy">Без&nbsp;поиска десятка подрядчиков. Быстрое погружение в&nbsp;суть.</p>
+                    <ul class="hero-services">
+                        <li>UI/UX-дизайн сайтов и&nbsp;приложений (Figma, Pixso)</li>
+                        <li>Графический дизайн (Adobe Illustrator, Photoshop, CorelDraw)</li>
+                        <li>Разработка сайтов и&nbsp;интернет-магазинов (Tilda, WordPress, HTML/CSS/JS, кастомные решения)</li>
+                        <li>SEO-продвижение, SERM, ORM</li>
+                        <li>Контекстная реклама (Яндекс.Директ, Avito, VK реклама)</li>
+                        <li>Настройка карт (Яндекс.Карты, Google My Business), работа с&nbsp;отзывами</li>
+                        <li>Настройка аналитики (Яндекс.Метрика, Google Analytics 4)</li>
+                        <li>Интеграции платежных систем, CRM и&nbsp;других сервисов</li>
+                    </ul>
+                </div>
+                
+                <div style="margin-top: 40px;">
+                    <a href="https://t.me/nefedor" class="btn-strict" target="_blank" rel="noopener noreferrer">
+                        <span>Заказать сайт</span>
+                        <span class="arrow-icon">[ → ]</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero-photo-box has-photo">
+                <img src="./001.jpg" alt="Портрет" class="hero-photo is-default">
+                <img src="./002.jpg" alt="Портрет при&nbsp;наведении" class="hero-photo is-hover">
+            </div>
+        </section>
+
+        <!-- БЛОК 2: МАНИФЕСТ -->
+        <section class="manifesto">
+            <div class="manifesto-left">
+                <div class="mono-text" style="color: var(--gray-light); margin-bottom: 20px;">[ ПАРАДИГМА ]</div>
+                <h2>НИКАКОГО ХАОСА.<br>ТОЛЬКО СИСТЕМА, ПРИНОСЯЩАЯ ЗАЯВКИ.</h2>
+            </div>
+            <div class="manifesto-right">
+                <p>Визуальная красота сайта не имеет смысла, если она не приносит продаж. Продукт создается исключительно с&nbsp;точки зрения маркетинга и&nbsp;пользовательского опыта.</p>
+                <p>Вы получаете инструмент, где каждый элемент интерфейса, текст и&nbsp;кнопка аккуратно ведут покупателя к&nbsp;целевому действию. Это экономит рекламный бюджет, повышает конверсию и&nbsp;освобождает время руководителей для&nbsp;стратегических задач.</p>
+            </div>
+        </section>
+
+        <!-- БЛОК 3: УСЛУГИ -->
+        <section>
+            <div class="services-header">
+                <h2>МОДУЛИ СИСТЕМЫ</h2>
+            </div>
+            
+            <div class="services-grid">
+                
+                <div class="service-col">
+                    <div class="service-icon-box">[ + ]</div>
+                    <div class="mono-text service-num">MOD_01</div>
+                    <h3>САЙТЫ ПОД&nbsp;КЛЮЧ</h3>
+                    <p>Клиенты находят товар и&nbsp;покупают 24/7. Лендинги и&nbsp;порталы с&nbsp;идеальной адаптивностью и&nbsp;заложенным SEO-фундаментом.</p>
+                </div>
+
+                <div class="service-col">
+                    <div class="service-icon-box">[ + ]</div>
+                    <div class="mono-text service-num">MOD_02</div>
+                    <h3>АЛГОРИТМЫ И&nbsp;БОТЫ</h3>
+                    <p>Рутина исчезает. Telegram-боты и&nbsp;автоворонки берут на&nbsp;себя круглосуточное общение и&nbsp;интеграцию с&nbsp;CRM.</p>
+                </div>
+
+                <div class="service-col">
+                    <div class="service-icon-box">[ + ]</div>
+                    <div class="mono-text service-num">MOD_03</div>
+                    <h3>ТРАФИК И&nbsp;АНАЛИЗ</h3>
+                    <p>Настройка кампаний и&nbsp;сквозной аналитики. Всегда кристально ясно, откуда приходят заявки и&nbsp;как снизить их стоимость.</p>
+                </div>
+
+                <div class="service-col" style="border-right: none;">
+                    <div class="service-icon-box">[ + ]</div>
+                    <div class="mono-text service-num">MOD_04</div>
+                    <h3>ДИЗАЙН БРЕНДА</h3>
+                    <p>Бренд выглядит дорого везде: от&nbsp;логотипа на&nbsp;экране до&nbsp;печатной визитки. Мощная визуальная отстройка.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- БЛОК 4: ПОРТФОЛИО (BENTO GRID С&nbsp;КАРТОЧКАМИ) -->
+        <section>
+            <div class="portfolio-header">
+                <h2>РЕШЁННЫЕ ЗАДАЧИ</h2>
+            </div>
+
+            <div class="portfolio-bento">
+                
+                <!-- Карточка 1 (Широкая, 2 колонки) -->
+                <a href="https://12storeez.com/" class="ptf-card" target="_blank" rel="noopener noreferrer">
+                    <div class="ptf-img-slot has-image">
+                        <img src="./12stor.jpg" alt="12Storeez">
+                    </div>
+                    <div class="ptf-info">
+                        <div class="mono-text">E-COMMERCE // RETAIL</div>
+                        <h3 class="ptf-title">12STOREEZ</h3>
+                        <p class="ptf-desc">Структурированный каталог и&nbsp;бесшовная интеграция оплаты.</p>
+                    </div>
+                </a>
+
+                <!-- Карточка 2 (Узкая, 1 колонка) -->
+                <a href="https://daisybar.ru/" class="ptf-card" target="_blank" rel="noopener noreferrer">
+                    <div class="ptf-img-slot has-image">
+                        <img src="./daysybar.jpg" alt="Daisy Bar">
+                    </div>
+                    <div class="ptf-info">
+                        <div class="mono-text">HORECA // BOOKING</div>
+                        <h3 class="ptf-title">DAISY BAR</h3>
+                        <p class="ptf-desc">Внедрена удобная система бронирования столов, полностью автоматизирующая прием заявок для&nbsp;администраторов заведения.</p>
+                    </div>
+                </a>
+
+                <!-- Карточка 3 (Узкая, 1 колонка) -->
+                <a href="https://akademestet.ru/" class="ptf-card" target="_blank" rel="noopener noreferrer">
+                    <div class="ptf-img-slot has-image">
+                        <img src="./akademestet.jpg" alt="Академия Эстетики">
+                    </div>
+                    <div class="ptf-info">
+                        <div class="mono-text">EDTECH // PAYMENTS</div>
+                        <h3 class="ptf-title">АКАДЕМИЯ ЭСТЕТИКИ</h3>
+                        <p class="ptf-desc">Прозрачная структура курсов и&nbsp;безопасный прием платежей.</p>
+                    </div>
+                </a>
+
+                <!-- Карточка 4 (Широкая, 2 колонки) -->
+                <a href="https://silverspoon.online/" class="ptf-card" target="_blank" rel="noopener noreferrer">
+                    <div class="ptf-img-slot has-image">
+                        <img src="./silverspoon.jpg" alt="Silverspoon">
+                    </div>
+                    <div class="ptf-info">
+                        <div class="mono-text">PLATFORM // SEO</div>
+                        <h3 class="ptf-title">SILVERSPOON</h3>
+                        <p class="ptf-desc">Помимо визуальной перепаковки, внедрен контент-план, обеспечивший стабильный рост органического трафика.</p>
+                    </div>
+                </a>
+
+                <!-- Карточка 5 (Широкая, 2 колонки) -->
+                <a href="https://martin.ge/ru" class="ptf-card" target="_blank" rel="noopener noreferrer">
+                    <div class="ptf-img-slot has-image">
+                        <img src="./martin.jpg" alt="Martin Logistics">
+                    </div>
+                    <div class="ptf-info">
+                        <div class="mono-text">B2B // CORPORATE</div>
+                        <h3 class="ptf-title">MARTIN LOGISTICS</h3>
+                        <p class="ptf-desc">Мультиязычная платформа. Оцифрован имидж международной компании, повышено доверие европейских партнеров.</p>
+                    </div>
+                </a>
+
+                <!-- Карточка 6 (Узкая, 1 колонка) -->
+                <a href="https://freework.spb.ru/" class="ptf-card" target="_blank" rel="noopener noreferrer">
+                    <div class="ptf-img-slot has-image">
+                        <img src="./freework.jpg" alt="Коворкинг Freework">
+                    </div>
+                    <div class="ptf-info">
+                        <div class="mono-text">B2B // НЕДВИЖИМОСТЬ</div>
+                        <h3 class="ptf-title">КОВОРКИНГ</h3>
+                        <p class="ptf-desc">Многостраничный сайт. Максимальное удобство для&nbsp;пользователя.</p>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- БЛОК 5: БЛОГ -->
+        <section class="blog-panel">
+            <div class="blog-panel-left">
+                <div class="mono-text" style="color: var(--gray-light); margin-bottom: 20px;">[ ЖУРНАЛ // ПРАКТИКА ]</div>
+                <h2 style="margin-bottom: 20px;">ЗАМЕТКИ О&nbsp;САЙТАХ,<br>МАРКЕТИНГЕ И&nbsp;СИСТЕМАХ</h2>
+                <p>Короткие разборы, наблюдения и&nbsp;практические решения для&nbsp;бизнеса, которому нужен не просто красивый экран, а работающий цифровой инструмент.</p>
+            </div>
+            <div class="blog-panel-right">
+                <div>
+                    <div class="mono-text" style="margin-bottom: 20px;">[ CONTENT PIPELINE // ONLINE ]</div>
+                    <p>Блог собирается из Markdown-статей, а для&nbsp;каждого материала назначается свой заголовок, описание и&nbsp;картинка для&nbsp;shared link.</p>
+                </div>
+                <a href="/blog/" class="btn-strict">
+                    <span>Открыть блог</span>
+                    <span class="arrow-icon">[ → ]</span>
+                </a>
+            </div>
+        </section>
+
+        <!-- БЛОК 6: ИНФО-ПАНЕЛЬ -->
+        <section class="info-panel">
+            
+            <div class="info-left">
+                <div class="mono-text" style="margin-bottom: 20px;">[ СТАНДАРТИЗАЦИЯ ]</div>
+                <h2 style="margin-bottom: 20px; font-size: 2.5rem;">РАЗРАБОТКА ПО<br>АЛГОРИТМАМ РЫНКА</h2>
+                <p>Архитектура сайтов и&nbsp;рекламных кампаний выстраивается по&nbsp;строгим правилам главных IT-гигантов. Официальное признание (сертификация Яндекс Бизнес, статус эксперта ВКонтакте) — это гарантия того, что проект изначально создается без&nbsp;технических ошибок.</p>
+                <div class="info-certs">
+                    <img src="./vkcert.jpg" alt="Сертификат ВКонтакте">
+                    <img src="./yacert.jpg" alt="Сертификат Яндекс Бизнес">
+                </div>
+            </div>
+
+            <div class="info-right">
+                <div class="info-content">
+                    <div class="mono-text" style="margin-bottom: 20px;">[ ВНИМАНИЕ: ОТСУТСТВИЕ ДАННЫХ ]</div>
+                    <h2 style="margin-bottom: 20px; font-size: 2.5rem;">НЕТ СВОЕГО<br>КОНТЕНТА?</h2>
+                    <p>Если для&nbsp;сайта не хватает качественных фотографий товаров или&nbsp;видео — этот вопрос закрывается под&nbsp;ключ. Организация профессиональной предметной съемки гарантирует идеальную конверсию.</p>
+                    <div class="info-video">
+                        <div style="position: relative; padding-top: 56.25%; width: 100%"><iframe src="https://kinescope.io/embed/spKTsa8wjQP4hTkPEzbJkk" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- FOOTER CTA -->
+        <section class="footer-cta">
+            <div class="mono-text" style="color: var(--gray-light); margin-bottom: 20px;">[ ТЕРМИНАЛ СВЯЗИ ]</div>
+            <h2>ГОТОВЫ ЗАПУСТИТЬ ПРОЦЕСС?</h2>
+            <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
+        </section>
+
+    </div>
+    </body>
+</html>
+
+

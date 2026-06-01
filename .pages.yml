@@ -1,0 +1,64 @@
+media:
+  input: assets/blog
+  output: /assets/blog
+  extensions: [jpg, jpeg, png, webp]
+  rename: safe
+
+content:
+  - name: blog
+    label: Блог
+    type: collection
+    path: content/blog
+    format: yaml-frontmatter
+    filename:
+      template: "{year}-{month}-{day}-{slug}.md"
+      field: create
+    view:
+      primary: title
+      fields: [date, published, slug]
+      sort: date
+      order: desc
+    fields:
+      - name: title
+        label: Заголовок
+        type: string
+        required: true
+      - name: slug
+        label: URL slug
+        type: string
+        required: true
+        pattern:
+          regex: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          message: "Только латиница, цифры и дефисы, например: site-redesign-checklist"
+      - name: date
+        label: Дата публикации
+        type: date
+        required: true
+      - name: published
+        label: Опубликовано
+        type: boolean
+        required: true
+        default: true
+      - name: description
+        label: Описание для SEO и shared link
+        type: text
+        required: true
+        options:
+          minlength: 40
+          maxlength: 180
+      - name: sharedImage
+        label: Картинка shared link
+        type: image
+        required: true
+      - name: sharedImageAlt
+        label: Alt-текст картинки
+        type: string
+        required: true
+      - name: tags
+        label: Теги
+        type: string
+        list: true
+      - name: body
+        label: Текст статьи
+        type: rich-text
+        required: true
