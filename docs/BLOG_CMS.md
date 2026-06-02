@@ -22,7 +22,7 @@
 - `date` - дата публикации.
 - `published` - если `false`, статья не попадает в сборку.
 - `description` - SEO и shared-link описание.
-- `coverImage` - видимая обложка карточки в сетке блога.
+- `coverImage` - видимая обложка карточки в сетке блога; рекомендуемый размер 1200x630 px.
 - `coverImageAlt` - alt-текст видимой обложки.
 - `showCoverInArticle` - показывает или скрывает `coverImage` в начале статьи.
 - `sharedImage` - картинка только для shared-link сниппетов, например `/assets/blog/post-share.jpg`; в теле статьи не выводится.
@@ -32,7 +32,7 @@
 
 ## Блоки статьи
 - `text` - Markdown/Rich text блок для абзацев, заголовков, списков и ссылок.
-- `image` - отдельная картинка между текстовыми блоками; поля: `image`, `alt`, `caption`, `size`.
+- `image` - отдельная картинка между текстовыми блоками; поля: `image`, `alt`, `caption`, `size`. В статье картинки выводятся целиком и сохраняют свои исходные пропорции.
 - `video` - адаптивный embed YouTube, Kinescope или другого HTTPS-плеера; поля: `provider`, `url`, `title`, `caption`, `size`. Вставлять нужно ссылку на видео или embed URL, не iframe-код.
 - `code` - блок кода с кнопкой копирования; поля: `language`, `caption`, `code`.
 - `quote` - цитата; поля: `text`, `author`.

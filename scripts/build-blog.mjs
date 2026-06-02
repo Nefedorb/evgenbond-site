@@ -123,9 +123,9 @@ const BLOG_EXTRA_CSS = `
         }
         .blog-card-media img {
             width: 100%;
-            aspect-ratio: 16 / 6.2;
-            height: auto;
-            object-fit: cover;
+            aspect-ratio: 40 / 21;
+            height: 100%;
+            object-fit: contain;
             display: block;
         }
         .blog-card-body {
@@ -270,8 +270,7 @@ const BLOG_EXTRA_CSS = `
         .article-cover img {
             width: 100%;
             max-width: 1120px;
-            aspect-ratio: 16 / 9;
-            object-fit: cover;
+            height: auto;
             border: var(--border);
             display: block;
             margin: 0 auto;
