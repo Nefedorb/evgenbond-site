@@ -1,90 +1,76 @@
 # Project State
 
-Дата снимка: 2026-06-01.
+Дата снимка: 2026-06-02.
 
 ## Где мы
 - Проект: статический персональный сайт `D:\code\333`.
 - GitHub repo: `https://github.com/Nefedorb/evgenbond-site`.
-- Прод-контур: GitHub Pages через workflow `.github/workflows/pages.yml`.
-- Домен в GitHub Pages: `evgenbond.ru`.
+- Прод: GitHub Pages, custom domain `evgenbond.ru`, HTTPS включён.
+- Деплой: push в `main` запускает workflow `.github/workflows/pages.yml`.
 - Локальная точка входа: `index.html`.
-- Блог: Markdown в `content/blog`, сборка в `_site/blog`.
-- CMS: Pages CMS через `.pages.yml`.
+- Блог: Markdown-файлы в `content/blog`, сборка через `scripts/build-blog.mjs` в `_site/blog`.
+- CMS: Pages CMS через `.pages.yml`, публичная точка входа `/admin/`.
+- Шрифт сайта и блога: Google Font `Inter Tight`; mono-элементы на `JetBrains Mono`.
 - Единственный агентский регламент: `skills/agents.md`.
-- Корневой `AGENTS.md` удалён намеренно. Если он открыт во вкладке VS Code, закрыть без сохранения.
 
 ## Что сделано
-- Поднят локальный git и создан public repo `Nefedorb/evgenbond-site`.
-- Добавлены `.gitignore` и `.gitattributes`.
-- Добавлены Node.js-скрипты сборки: `npm run build`, `npm run dev`.
-- Добавлен генератор блога `scripts/build-blog.mjs`.
-- Добавлена валидация frontmatter статьи.
-- Добавлена конфигурация Pages CMS `.pages.yml`.
-- Добавлены `admin/index.html`, `docs/BLOG_CMS.md`, пример статьи и папка `assets/blog`.
-- На главную добавлен блок со ссылкой на `/blog/`.
-- Добавлен GitHub Pages workflow.
-- GitHub Pages включён, custom domain выставлен как `evgenbond.ru`.
-- Корневой `AGENTS.md` удалён, правило проекта перенесено в `skills/agents.md`.
+- Главная страница и блог опубликованы на `https://evgenbond.ru/`.
+- Блог переведён в компактный журнальный layout без большого hero.
+- Добавлен блочный конструктор статей в Pages CMS: `text`, `image`, `video`, `code`, `quote`, `divider`.
+- Разведены изображения:
+  - `coverImage` - видимая обложка карточки и опциональная обложка в статье;
+  - `sharedImage` - только OG/Twitter/snippet, в статье не выводится.
+- Обложки карточек адаптированы под формат `1200x630` без кропа.
+- Картинки внутри статьи сохраняют исходные пропорции.
+- У каждого `image`-блока есть свитчер `showBorder` / `Показывать рамку`.
+- Добавлены кликабельные теги и статические страницы тегов вида `/blog/tag/<slug>/`.
+- Добавлена статическая пагинация блога по 6 статей на страницу.
+- Добавлены видео-блоки для YouTube, Kinescope и безопасного custom HTTPS embed URL.
+- В code-блоках есть кнопка копирования.
+- В blog-навигации используются SVG-иконки `/arrow.svg`.
+- Футер блога: оставлен label `[ ТЕРМИНАЛ СВЯЗИ ]`, большой CTA-заголовок убран.
 
-## Базовые коммиты до этого снимка
-- `018fd23 Keep single agents guide`
-- `8cc6d79 Update Pages workflow actions`
-- `90fdd50 Initial static site and blog CMS scaffold`
-
-Актуальный список после новых правок:
-```powershell
-git log --oneline --decorate -5
-```
+## Актуальные файлы
+- `.pages.yml` - схема Pages CMS.
+- `scripts/build-blog.mjs` - генератор блога, HTML/CSS блога, валидация контента.
+- `docs/BLOG_CMS.md` - инструкция по CMS и структуре статей.
+- `content/blog/*.md` - статьи.
+- `assets/blog/*` - загруженные через Pages CMS изображения.
+- `admin/index.html` - страница входа в админку.
+- `skills/agents.md` - локальный агентский регламент проекта.
 
 ## Проверено
-- `npm install` - успешно.
-- `npm run build` - успешно, собирает 1 опубликованную статью.
-- `npm audit --audit-level=moderate` - 0 vulnerabilities.
-- Локальные URL отдавали 200:
-  - `http://localhost:4173/`
-  - `http://localhost:4173/blog/`
-  - `http://localhost:4173/blog/zachem-biznesu-sistemnyy-sayt/`
-  - `http://localhost:4173/admin/`
-- Playwright-снимки desktop/mobile визуально проверены.
-- GitHub Actions успешен на последнем deploy после удаления дубля agents:
-  - `https://github.com/Nefedorb/evgenbond-site/actions/runs/26767954774`
+- `npm run build` успешно собирает `_site`.
+- Последний деплой GitHub Pages после CMS-правок и обновлений генератора успешен.
+- Публичные URL работают:
+  - `https://evgenbond.ru/`
+  - `https://evgenbond.ru/blog/`
+  - `https://evgenbond.ru/blog/tipograf-dlya-teksta/`
+  - `https://evgenbond.ru/admin/`
+- Raw `.pages.yml` в GitHub содержит актуальные поля CMS, включая `showBorder`.
 
-## Что нужно дальше
-1. Дождаться DNS или поправить записи у DNS-провайдера.
-   - Для `evgenbond.ru` нужны A-записи GitHub Pages:
-     - `185.199.108.153`
-     - `185.199.109.153`
-     - `185.199.110.153`
-     - `185.199.111.153`
-   - Последняя проверка всё ещё показывала старый IP `87.236.16.15`.
-2. Для `www.evgenbond.ru` CNAME нужен только если нужен `www`.
-   - Старую A-запись для `www` нужно удалить.
-   - Затем добавить CNAME `www -> nefedorb.github.io`.
-   - Если DNS-панель не даёт CNAME, можно временно жить без `www`.
-3. После DNS propagation включить HTTPS:
-   ```powershell
-   gh api --method PUT repos/Nefedorb/evgenbond-site/pages -F https_enforced=true
-   ```
-4. Проверить публичные URL:
-   - `https://evgenbond.ru/`
-   - `https://evgenbond.ru/blog/`
-   - `https://evgenbond.ru/blog/zachem-biznesu-sistemnyy-sayt/`
-   - `https://evgenbond.ru/admin/`
-5. Проверить Pages CMS на реальном сценарии:
-   - войти на `https://app.pagescms.org/`;
-   - выбрать `Nefedorb/evgenbond-site`;
-   - создать тестовую draft-статью;
-   - убедиться, что commit запускает GitHub Actions.
-6. Заменить пример статьи на реальную или оставить как черновик.
+## Важные правила работы
+- Не коммитить `_site`: GitHub Actions сам собирает и публикует сайт.
+- Не добавлять новые npm-зависимости без явной причины.
+- Не трогать и не коммитить `skills/agents.md` в задачах блога/CMS, если пользователь явно не попросил.
+- Если Pages CMS сделал коммит параллельно локальной работе, перед push делать `pull --rebase`, сохранив локальные незакоммиченные правки.
+- Текущая локальная незакоммиченная правка: `skills/agents.md`.
 
-## Быстрый старт после перезапуска VS Code
+## Быстрый старт
 ```powershell
 cd D:\code\333
-git status --short --ignored
+git status --short
 npm run build
 npm run dev
 ```
 
-Открыть `http://localhost:4173/`.
+Открыть локально:
+- `http://localhost:4173/`
+- `http://localhost:4173/blog/`
+- `http://localhost:4173/blog/tipograf-dlya-teksta/`
+- `http://localhost:4173/admin/`
 
-Если VS Code после перезапуска показывает вкладку `AGENTS.md`, её не сохранять. На диске этот файл удалён по решению проекта.
+## Что можно делать дальше
+- Проверить новый свитчер `Показывать рамку` прямо в Pages CMS.
+- Дополнять реальные статьи и при необходимости снять демо-контент с публикации через `published: false`.
+- При росте блога проверить пагинацию и страницы тегов на реальном наборе материалов.
