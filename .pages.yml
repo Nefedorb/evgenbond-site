@@ -115,6 +115,44 @@ content:
                       label: Обычный
                     - name: full
                       label: На всю ширину
+          - name: video
+            label: Видео
+            fields:
+              - name: provider
+                label: Платформа
+                type: select
+                required: true
+                default: youtube
+                options:
+                  values:
+                    - name: youtube
+                      label: YouTube
+                    - name: kinescope
+                      label: Kinescope
+                    - name: custom
+                      label: Custom embed URL
+              - name: url
+                label: Ссылка на видео или embed URL
+                type: string
+                required: true
+                description: "YouTube/Kinescope можно вставлять обычной ссылкой. Для custom нужен только https embed URL, не iframe-код."
+              - name: title
+                label: Заголовок видео
+                type: string
+                required: true
+              - name: caption
+                label: Подпись
+                type: string
+              - name: size
+                label: Размер
+                type: select
+                default: normal
+                options:
+                  values:
+                    - name: normal
+                      label: Обычный
+                    - name: full
+                      label: На всю ширину
           - name: code
             label: Код
             fields:

@@ -12,7 +12,9 @@ const DIST = path.join(ROOT, "_site");
 const BLOG_DIR = path.join(ROOT, "content", "blog");
 const SITE_URL = (process.env.SITE_URL || "https://evgenbond.ru").replace(/\/$/, "");
 const SITE_TITLE = "Создание сайтов и цифровые услуги для малого и среднего бизнеса";
+const SITE_META_SUFFIX = "evgenbond.ru";
 const SITE_DESCRIPTION = "Практика, заметки и разборы о сайтах, маркетинге, контенте и цифровых системах для бизнеса.";
+const POSTS_PER_PAGE = 6;
 
 marked.use({
   gfm: true,
@@ -77,24 +79,29 @@ const BLOG_EXTRA_CSS = `
             color: var(--black);
             text-decoration: none;
             border-right: var(--border);
-            border-bottom: var(--border);
             background: var(--white);
             transition: var(--transition-fast);
         }
         .blog-card:nth-child(3n) { border-right: none; }
+        .blog-card:nth-last-child(n+4) { border-bottom: var(--border); }
         .blog-card:hover {
             background: #FAFAFA;
             color: var(--black);
         }
+        .blog-card a {
+            color: var(--black);
+            text-decoration: none;
+        }
         .blog-card-media {
-            aspect-ratio: 16 / 6.2;
-            border-bottom: var(--border);
+            display: block;
+            padding: 10px 10px 0;
             overflow: hidden;
-            background: var(--bg-color);
+            background: var(--white);
         }
         .blog-card-media img {
             width: 100%;
-            height: 100%;
+            aspect-ratio: 16 / 6.2;
+            height: auto;
             object-fit: cover;
             display: block;
         }
@@ -111,9 +118,40 @@ const BLOG_EXTRA_CSS = `
             letter-spacing: 0;
             text-transform: none;
         }
+        .blog-card-title a:hover {
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
         .blog-card-body p {
             font-size: 0.9rem;
             line-height: 1.25;
+        }
+        .blog-card-meta,
+        .article-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 8px;
+        }
+        .blog-tags,
+        .article-tags {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+        .blog-tag {
+            color: var(--black);
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+        .blog-tag:hover {
+            color: var(--brand-red);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .blog-meta-dot {
+            color: var(--gray-dark);
         }
         .blog-card-read {
             margin-top: auto;
@@ -122,9 +160,42 @@ const BLOG_EXTRA_CSS = `
             font-size: 0.88rem;
             text-transform: uppercase;
         }
-        .blog-card:hover .blog-card-read {
+        .blog-card-read:hover {
             text-decoration: underline;
             text-underline-offset: 4px;
+        }
+        .blog-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 18px 24px;
+            border-bottom: var(--border);
+            background: var(--white);
+        }
+        .blog-pagination a,
+        .blog-pagination span {
+            color: var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+        .blog-pagination a {
+            padding: 7px 8px;
+            transition: var(--transition-fast);
+        }
+        .blog-pagination a:hover {
+            background: var(--bg-color);
+        }
+        .blog-pagination .is-current {
+            padding: 7px 9px;
+            background: var(--black);
+            color: var(--white);
+        }
+        .blog-pagination-next {
+            font-weight: 700;
         }
         .blog-shell .footer-cta {
             padding: 40px 32px;
@@ -222,7 +293,28 @@ const BLOG_EXTRA_CSS = `
             border: var(--border);
             display: block;
         }
+        .article-video-block {
+            max-width: 880px;
+        }
+        .article-video-block.is-full {
+            max-width: 1120px;
+        }
+        .article-video-frame {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: var(--border);
+            background: var(--black);
+            display: block;
+            overflow: hidden;
+        }
+        .article-video-frame iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+        }
         .article-image-caption,
+        .article-video-caption,
         .article-code-caption {
             margin-top: 10px;
             color: var(--gray-dark);
@@ -305,6 +397,12 @@ const BLOG_EXTRA_CSS = `
             padding: 48px 40px;
             border-bottom: var(--border);
         }
+        .empty-blog-kicker {
+            margin-bottom: 20px;
+        }
+        .empty-blog-copy {
+            margin-top: 20px;
+        }
         @media (max-width: 1024px) {
             .blog-page-header,
             .article-hero {
@@ -318,6 +416,8 @@ const BLOG_EXTRA_CSS = `
             .blog-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .blog-card:nth-child(3n) { border-right: var(--border); }
             .blog-card:nth-child(even) { border-right: none; }
+            .blog-card:nth-last-child(n+4) { border-bottom: none; }
+            .blog-card:nth-last-child(n+3) { border-bottom: var(--border); }
         }
         @media (max-width: 768px) {
             .blog-page-header,
@@ -330,6 +430,8 @@ const BLOG_EXTRA_CSS = `
             .blog-card,
             .blog-card:nth-child(3n),
             .blog-card:nth-child(even) { border-right: none; }
+            .blog-card:nth-last-child(n+3) { border-bottom: none; }
+            .blog-card:nth-last-child(n+2) { border-bottom: var(--border); }
             .blog-card-body { min-height: 0; }
             .article-hero h1 { font-size: 2.25rem; }
             .article-content { padding: 36px 22px 56px; }
@@ -391,12 +493,87 @@ function normalizeDate(value, sourceFile) {
   return date;
 }
 
-function formatDate(date) {
+function formatArticleDate(date) {
   return new Intl.DateTimeFormat("ru-RU", {
     day: "2-digit",
     month: "long",
     year: "numeric"
   }).format(date);
+}
+
+function formatCardDate(date) {
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(date);
+}
+
+const CYRILLIC_TO_LATIN = {
+  а: "a",
+  б: "b",
+  в: "v",
+  г: "g",
+  д: "d",
+  е: "e",
+  ё: "e",
+  ж: "zh",
+  з: "z",
+  и: "i",
+  й: "y",
+  к: "k",
+  л: "l",
+  м: "m",
+  н: "n",
+  о: "o",
+  п: "p",
+  р: "r",
+  с: "s",
+  т: "t",
+  у: "u",
+  ф: "f",
+  х: "h",
+  ц: "ts",
+  ч: "ch",
+  ш: "sh",
+  щ: "sch",
+  ъ: "",
+  ы: "y",
+  ь: "",
+  э: "e",
+  ю: "yu",
+  я: "ya"
+};
+
+function slugifyTag(tag) {
+  const transliterated = String(tag)
+    .trim()
+    .toLowerCase()
+    .split("")
+    .map((char) => CYRILLIC_TO_LATIN[char] ?? char)
+    .join("");
+
+  return transliterated
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-") || "tag";
+}
+
+function getPreviewTags(tags) {
+  const result = [];
+  let characters = 0;
+
+  for (const tag of tags) {
+    const tagLength = tag.length;
+
+    if (result.length >= 3) break;
+    if (result.length > 0 && characters + tagLength > 26) break;
+
+    result.push(tag);
+    characters += tagLength;
+  }
+
+  return result;
 }
 
 function validateImage(imagePath, sourceFile, fieldName = "image") {
@@ -426,6 +603,90 @@ function validateImage(imagePath, sourceFile, fieldName = "image") {
   }
 
   return normalizedImagePath;
+}
+
+function parseVideoUrl(value, sourceFile, fieldName) {
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new Error(`${sourceFile}: ${fieldName} обязателен`);
+  }
+
+  const normalizedUrl = value.trim();
+
+  if (/[<>]/.test(normalizedUrl)) {
+    throw new Error(`${sourceFile}: ${fieldName} должен быть ссылкой, а не iframe-кодом`);
+  }
+
+  let parsedUrl;
+
+  try {
+    parsedUrl = new URL(normalizedUrl);
+  } catch {
+    throw new Error(`${sourceFile}: ${fieldName} должен быть корректным URL`);
+  }
+
+  if (parsedUrl.protocol !== "https:") {
+    throw new Error(`${sourceFile}: ${fieldName} должен начинаться с https://`);
+  }
+
+  return parsedUrl;
+}
+
+function normalizeYouTubeEmbedUrl(value, sourceFile, fieldName) {
+  const url = parseVideoUrl(value, sourceFile, fieldName);
+  const host = url.hostname.replace(/^www\./, "").toLowerCase();
+  let videoId = "";
+
+  if (host === "youtu.be") {
+    videoId = url.pathname.split("/").filter(Boolean)[0] || "";
+  } else if (host === "youtube.com" || host === "youtube-nocookie.com" || host === "m.youtube.com") {
+    const pathParts = url.pathname.split("/").filter(Boolean);
+
+    if (url.pathname === "/watch") {
+      videoId = url.searchParams.get("v") || "";
+    } else if (pathParts[0] === "embed" || pathParts[0] === "shorts") {
+      videoId = pathParts[1] || "";
+    }
+  }
+
+  if (!/^[a-zA-Z0-9_-]{6,}$/.test(videoId)) {
+    throw new Error(`${sourceFile}: ${fieldName} должен быть ссылкой на YouTube video/watch/shorts/embed`);
+  }
+
+  return `https://www.youtube-nocookie.com/embed/${videoId}`;
+}
+
+function normalizeKinescopeEmbedUrl(value, sourceFile, fieldName) {
+  const url = parseVideoUrl(value, sourceFile, fieldName);
+  const host = url.hostname.replace(/^www\./, "").toLowerCase();
+  const pathParts = url.pathname.split("/").filter(Boolean);
+
+  if (host === "player.kinescope.io") {
+    return url.toString();
+  }
+
+  if (host !== "kinescope.io") {
+    throw new Error(`${sourceFile}: ${fieldName} должен быть ссылкой на kinescope.io или player.kinescope.io`);
+  }
+
+  const videoId = pathParts[0] === "embed" ? pathParts[1] : pathParts[0];
+
+  if (!videoId || !/^[a-zA-Z0-9_-]+$/.test(videoId)) {
+    throw new Error(`${sourceFile}: ${fieldName} должен быть ссылкой на Kinescope video/embed`);
+  }
+
+  return `https://kinescope.io/embed/${videoId}`;
+}
+
+function normalizeCustomEmbedUrl(value, sourceFile, fieldName) {
+  return parseVideoUrl(value, sourceFile, fieldName).toString();
+}
+
+function normalizeVideoEmbedUrl(provider, value, sourceFile, fieldName) {
+  if (provider === "youtube") return normalizeYouTubeEmbedUrl(value, sourceFile, fieldName);
+  if (provider === "kinescope") return normalizeKinescopeEmbedUrl(value, sourceFile, fieldName);
+  if (provider === "custom") return normalizeCustomEmbedUrl(value, sourceFile, fieldName);
+
+  throw new Error(`${sourceFile}: ${fieldName} использует неизвестную платформу видео ${provider}`);
 }
 
 function requireString(value, sourceFile, fieldName) {
@@ -476,6 +737,28 @@ function validateBlock(block, sourceFile, index) {
       type,
       image: validateImage(block.image, sourceFile, `${blockPrefix}.image`),
       alt: requireString(block.alt, sourceFile, `${blockPrefix}.alt`),
+      caption: typeof block.caption === "string" ? block.caption.trim() : "",
+      size
+    };
+  }
+
+  if (type === "video") {
+    const provider = typeof block.provider === "string" && block.provider.trim()
+      ? block.provider.trim()
+      : "youtube";
+
+    if (!["youtube", "kinescope", "custom"].includes(provider)) {
+      throw new Error(`${sourceFile}: ${blockPrefix}.provider использует неизвестную платформу видео ${provider}`);
+    }
+
+    const size = block.size === "full" ? "full" : "normal";
+    const url = normalizeVideoEmbedUrl(provider, block.url, sourceFile, `${blockPrefix}.url`);
+
+    return {
+      type,
+      provider,
+      url,
+      title: requireString(block.title, sourceFile, `${blockPrefix}.title`),
       caption: typeof block.caption === "string" ? block.caption.trim() : "",
       size
     };
@@ -532,9 +815,21 @@ function validatePost(frontmatter, rawBody, sourceFile) {
     ? frontmatter.coverImageAlt.trim()
     : frontmatter.sharedImageAlt.trim();
   const blocks = normalizeBlocks(frontmatter.blocks, rawBody, sourceFile);
-  const tags = Array.isArray(frontmatter.tags)
-    ? frontmatter.tags.filter(Boolean).map(String)
-    : [];
+  const tags = [];
+  const tagSlugs = new Set();
+
+  if (Array.isArray(frontmatter.tags)) {
+    for (const tag of frontmatter.tags) {
+      const normalizedTag = String(tag || "").trim();
+      if (!normalizedTag) continue;
+
+      const tagSlug = slugifyTag(normalizedTag);
+      if (tagSlugs.has(tagSlug)) continue;
+
+      tagSlugs.add(tagSlug);
+      tags.push(normalizedTag);
+    }
+  }
 
   return {
     title: frontmatter.title.trim(),
@@ -652,7 +947,7 @@ function renderHead({ title, description, path: pagePath, image, imageAlt, type 
 }
 
 function renderPage({ head, style, body }) {
-  return `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="ru">
 <head>${head}
     <style>${style}
@@ -663,6 +958,8 @@ ${body}
 </body>
 </html>
 `;
+
+  return html.replace(/[ \t]+$/gm, "");
 }
 
 function sanitizeArticleHtml(html) {
@@ -714,6 +1011,20 @@ function renderImageBlock(block) {
                 </figure>`;
 }
 
+function renderVideoBlock(block) {
+  const caption = block.caption
+    ? `<figcaption class="article-video-caption mono-text">${escapeHtml(block.caption)}</figcaption>`
+    : "";
+
+  return `
+                <figure class="article-block article-video-block${block.size === "full" ? " is-full" : ""}">
+                    <div class="article-video-frame">
+                        <iframe src="${escapeHtml(block.url)}" title="${escapeHtml(block.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    ${caption}
+                </figure>`;
+}
+
 function renderQuoteBlock(block) {
   const author = block.author
     ? `<div class="article-quote-author mono-text">${escapeHtml(block.author)}</div>`
@@ -743,6 +1054,7 @@ ${renderMarkdownBlock(block.body)}
     }
 
     if (block.type === "image") return renderImageBlock(block);
+    if (block.type === "video") return renderVideoBlock(block);
     if (block.type === "code") return renderCodeBlock(block.code, block.language, block.caption);
     if (block.type === "quote") return renderQuoteBlock(block);
     if (block.type === "divider") return renderDividerBlock(block);
@@ -788,32 +1100,113 @@ function renderCopyCodeScript() {
     </script>`;
 }
 
-function renderBlogIndex(posts, style) {
+function getTagPath(tagSlug, pageNumber = 1) {
+  return pageNumber === 1
+    ? `/blog/tag/${tagSlug}/`
+    : `/blog/tag/${tagSlug}/page/${pageNumber}/`;
+}
+
+function getBlogPagePath(pageNumber) {
+  return pageNumber === 1 ? "/blog/" : `/blog/page/${pageNumber}/`;
+}
+
+function renderTagLinks(tags, { preview = false } = {}) {
+  const visibleTags = preview ? getPreviewTags(tags) : tags;
+
+  if (!visibleTags.length) return "";
+
+  return `
+                            <span class="blog-tags">
+${visibleTags.map((tag) => {
+    const tagSlug = slugifyTag(tag);
+    return `                                <a class="blog-tag" href="${escapeHtml(getTagPath(tagSlug))}">${escapeHtml(tag)}</a>`;
+  }).join("\n")}
+                            </span>`;
+}
+
+function renderCardMeta(post) {
+  const tags = renderTagLinks(post.tags, { preview: true });
+  const divider = tags ? `<span class="blog-meta-dot">·</span>` : "";
+
+  return `
+                        <div class="mono-text blog-card-meta">
+${tags}
+                            ${divider}
+                            <time datetime="${escapeHtml(post.dateIso)}">${escapeHtml(formatCardDate(post.date))}</time>
+                        </div>`;
+}
+
+function renderArticleMeta(post) {
+  const tags = renderTagLinks(post.tags);
+  const divider = tags ? `<span class="blog-meta-dot">·</span>` : "";
+
+  return `
+                    <div class="mono-text article-meta">
+                        <time datetime="${escapeHtml(post.dateIso)}">${escapeHtml(formatArticleDate(post.date))}</time>
+                        ${divider}
+${tags}
+                    </div>`;
+}
+
+function renderPagination(currentPage, totalPages, getPagePath = getBlogPagePath) {
+  if (totalPages <= 1) return "";
+
+  const pageLinks = Array.from({ length: totalPages }, (_value, index) => {
+    const pageNumber = index + 1;
+
+    if (pageNumber === currentPage) {
+      return `<span class="is-current">${pageNumber}</span>`;
+    }
+
+    return `<a href="${escapeHtml(getPagePath(pageNumber))}">${pageNumber}</a>`;
+  }).join("");
+
+  const nextLink = currentPage < totalPages
+    ? `<a class="blog-pagination-next" href="${escapeHtml(getPagePath(currentPage + 1))}">Далее →</a>`
+    : `<span class="blog-pagination-next">Далее →</span>`;
+
+  return `
+        <nav class="blog-pagination" aria-label="Страницы блога">
+            ${pageLinks}
+            ${nextLink}
+        </nav>`;
+}
+
+function renderBlogIndex(posts, style, {
+  currentPage = 1,
+  totalPages = 1,
+  pagePath = getBlogPagePath(currentPage),
+  getPagePath = getBlogPagePath,
+  pageTitle = currentPage === 1 ? `Блог — ${SITE_META_SUFFIX}` : `Блог, страница ${currentPage} — ${SITE_META_SUFFIX}`,
+  pageDescription = SITE_DESCRIPTION,
+  headerLabel = "Блог",
+  headerSummary = SITE_DESCRIPTION
+} = {}) {
   const cards = posts.length
     ? posts.map((post) => `
-                <a class="blog-card" href="/blog/${escapeHtml(post.slug)}/">
-                    <div class="blog-card-media">
+                <article class="blog-card">
+                    <a class="blog-card-media" href="/blog/${escapeHtml(post.slug)}/" aria-label="${escapeHtml(post.title)}">
                         <img src="${escapeHtml(post.coverImage)}" alt="${escapeHtml(post.coverImageAlt)}" loading="lazy">
-                    </div>
+                    </a>
                     <div class="blog-card-body">
-                        <div class="mono-text">${post.tags.length ? `${escapeHtml(post.tags[0])} · ` : ""}${escapeHtml(formatDate(post.date))}</div>
-                        <h2 class="blog-card-title">${escapeHtml(post.title)}</h2>
+${renderCardMeta(post)}
+                        <h2 class="blog-card-title"><a href="/blog/${escapeHtml(post.slug)}/">${escapeHtml(post.title)}</a></h2>
                         <p>${escapeHtml(post.description)}</p>
-                        <div class="blog-card-read">Читать →</div>
+                        <a class="blog-card-read" href="/blog/${escapeHtml(post.slug)}/">Читать →</a>
                     </div>
-                </a>`).join("")
+                </article>`).join("")
     : `
                 <div class="empty-blog">
-                    <div class="mono-text" style="margin-bottom: 20px;">[ CONTENT PIPELINE // EMPTY ]</div>
+                    <div class="mono-text empty-blog-kicker">[ CONTENT PIPELINE // EMPTY ]</div>
                     <h2>МАТЕРИАЛЫ СКОРО ПОЯВЯТСЯ</h2>
-                    <p style="margin-top: 20px;">Админка уже готова принимать статьи, картинки и SEO-описания.</p>
+                    <p class="empty-blog-copy">Админка уже готова принимать статьи, картинки и SEO-описания.</p>
                 </div>`;
 
   const body = `
     <div class="master-grid blog-shell">
         <section class="blog-page-header">
-            <div class="mono-text blog-page-label">Блог</div>
-            <p class="blog-page-summary">${escapeHtml(SITE_DESCRIPTION)}</p>
+            <div class="mono-text blog-page-label">${escapeHtml(headerLabel)}</div>
+            <p class="blog-page-summary">${escapeHtml(headerSummary)}</p>
             <a href="/" class="blog-nav-link">
                 <span>На главную</span>
                 <span>←</span>
@@ -822,8 +1215,9 @@ function renderBlogIndex(posts, style) {
         <section class="blog-list">
 ${cards}
         </section>
+${renderPagination(currentPage, totalPages, getPagePath)}
         <section class="footer-cta">
-            <div class="mono-text" style="color: var(--gray-light); margin-bottom: 20px;">[ ТЕРМИНАЛ СВЯЗИ ]</div>
+            <div class="mono-text footer-cta-label">[ ТЕРМИНАЛ СВЯЗИ ]</div>
             <h2>ЕСТЬ ЗАДАЧА ДЛЯ САЙТА?</h2>
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
         </section>
@@ -831,9 +1225,9 @@ ${cards}
 
   return renderPage({
     head: renderHead({
-      title: `Блог — ${SITE_TITLE}`,
-      description: SITE_DESCRIPTION,
-      path: "/blog/",
+      title: pageTitle,
+      description: pageDescription,
+      path: pagePath,
       image: "/sharedlink.jpg",
       imageAlt: SITE_TITLE
     }),
@@ -856,7 +1250,7 @@ function renderPost(post, style) {
         <article class="article-shell">
             <header class="article-hero">
                 <div class="article-hero-main">
-                    <div class="mono-text">${escapeHtml(formatDate(post.date))}${post.tags.length ? ` · ${escapeHtml(post.tags.join(" / "))}` : ""}</div>
+${renderArticleMeta(post)}
                     <h1>${escapeHtml(post.title)}</h1>
                     <p>${escapeHtml(post.description)}</p>
                 </div>
@@ -871,7 +1265,7 @@ ${content}
             </div>
         </article>
         <section class="footer-cta">
-            <div class="mono-text" style="color: var(--gray-light); margin-bottom: 20px;">[ ТЕРМИНАЛ СВЯЗИ ]</div>
+            <div class="mono-text footer-cta-label">[ ТЕРМИНАЛ СВЯЗИ ]</div>
             <h2>НУЖЕН САЙТ С ТАКОЙ ЖЕ СИСТЕМОЙ?</h2>
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
         </section>
@@ -880,7 +1274,7 @@ ${renderCopyCodeScript()}`;
 
   return renderPage({
     head: renderHead({
-      title: `${post.title} — ${SITE_TITLE}`,
+      title: `${post.title} — ${SITE_META_SUFFIX}`,
       description: post.description,
       path: `/blog/${post.slug}/`,
       image: post.sharedImage,
@@ -923,14 +1317,80 @@ async function readPosts() {
   return posts.sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
+function collectTagGroups(posts) {
+  const groups = new Map();
+
+  for (const post of posts) {
+    for (const tag of post.tags) {
+      const tagSlug = slugifyTag(tag);
+
+      if (!groups.has(tagSlug)) {
+        groups.set(tagSlug, {
+          slug: tagSlug,
+          title: tag,
+          posts: []
+        });
+      }
+
+      groups.get(tagSlug).posts.push(post);
+    }
+  }
+
+  return Array.from(groups.values()).sort((a, b) => a.title.localeCompare(b.title, "ru"));
+}
+
 async function writeBlog(posts, style) {
   await fs.mkdir(path.join(DIST, "blog"), { recursive: true });
-  await fs.writeFile(path.join(DIST, "blog", "index.html"), renderBlogIndex(posts, style), "utf8");
+  const totalPages = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
+
+  for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
+    const pagePosts = posts.slice(
+      (pageNumber - 1) * POSTS_PER_PAGE,
+      pageNumber * POSTS_PER_PAGE
+    );
+    const pageHtml = renderBlogIndex(pagePosts, style, { currentPage: pageNumber, totalPages });
+    const pageDir = pageNumber === 1
+      ? path.join(DIST, "blog")
+      : path.join(DIST, "blog", "page", String(pageNumber));
+
+    await fs.mkdir(pageDir, { recursive: true });
+    await fs.writeFile(path.join(pageDir, "index.html"), pageHtml, "utf8");
+  }
 
   for (const post of posts) {
     const postDir = path.join(DIST, "blog", post.slug);
     await fs.mkdir(postDir, { recursive: true });
     await fs.writeFile(path.join(postDir, "index.html"), renderPost(post, style), "utf8");
+  }
+
+  for (const tagGroup of collectTagGroups(posts)) {
+    const tagTotalPages = Math.max(1, Math.ceil(tagGroup.posts.length / POSTS_PER_PAGE));
+
+    for (let pageNumber = 1; pageNumber <= tagTotalPages; pageNumber += 1) {
+      const pagePosts = tagGroup.posts.slice(
+        (pageNumber - 1) * POSTS_PER_PAGE,
+        pageNumber * POSTS_PER_PAGE
+      );
+      const tagPath = getTagPath(tagGroup.slug, pageNumber);
+      const pageHtml = renderBlogIndex(pagePosts, style, {
+        currentPage: pageNumber,
+        totalPages: tagTotalPages,
+        pagePath: tagPath,
+        getPagePath: (targetPage) => getTagPath(tagGroup.slug, targetPage),
+        pageTitle: pageNumber === 1
+          ? `Тег: ${tagGroup.title} — ${SITE_META_SUFFIX}`
+          : `Тег: ${tagGroup.title}, страница ${pageNumber} — ${SITE_META_SUFFIX}`,
+        pageDescription: `Все статьи с тегом «${tagGroup.title}».`,
+        headerLabel: "Тег",
+        headerSummary: `Все статьи с тегом «${tagGroup.title}».`
+      });
+      const pageDir = pageNumber === 1
+        ? path.join(DIST, "blog", "tag", tagGroup.slug)
+        : path.join(DIST, "blog", "tag", tagGroup.slug, "page", String(pageNumber));
+
+      await fs.mkdir(pageDir, { recursive: true });
+      await fs.writeFile(path.join(pageDir, "index.html"), pageHtml, "utf8");
+    }
   }
 }
 

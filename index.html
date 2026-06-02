@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -20,7 +20,7 @@
     <meta name="twitter:image" content="https://evgenbond.ru/sharedlink.jpg">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@200;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -33,10 +33,10 @@
             --brand-red: #C80000;
             --gray-dark: #333333;
             --gray-light: #CCCCCC;
-            
+
             --border: 1px solid var(--black);
             --border-thick: 3px solid var(--black);
-            
+
             --transition-fast: 0.2s cubic-bezier(0.25, 1, 0.5, 1);
             --transition-slow: 0.5s cubic-bezier(0.25, 1, 0.5, 1);
         }
@@ -64,19 +64,24 @@
         }
 
         h1, h2, h3 { font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; }
-        
+
         h1 { font-size: clamp(3rem, 7vw, 7rem); line-height: 0.85; margin-bottom: 20px;}
         h2 { font-size: clamp(2rem, 4vw, 4rem); line-height: 0.9; }
         h3 { font-size: 1.5rem; margin-bottom: 10px; }
-        
+
         p { font-size: 1.1rem; font-weight: 400; color: var(--gray-dark); }
-        
+
         .mono-text {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
+
+        .section-kicker { margin-bottom: 20px; }
+        .section-kicker-muted { color: var(--gray-light); }
+        .section-heading-spaced { margin-bottom: 20px; }
+        .section-heading-medium { margin-bottom: 20px; font-size: 2.5rem; }
 
         .btn-strict {
             display: inline-flex;
@@ -96,7 +101,7 @@
             overflow: hidden;
             cursor: pointer;
         }
-        
+
         .btn-strict::after {
             content: "";
             position: absolute;
@@ -109,7 +114,7 @@
         .btn-strict:hover::after { left: 0; }
         .btn-strict:hover { color: var(--white); border-color: var(--brand-red); }
         .btn-strict span { position: relative; z-index: 2; }
-        
+
         .arrow-icon { font-family: 'JetBrains Mono'; transition: var(--transition-fast); position: relative; z-index: 2;}
         .btn-strict:hover .arrow-icon { transform: translateX(10px); color: var(--white);}
 
@@ -153,6 +158,9 @@
         }
         .hero-lead-wrap + .hero-copy {
             margin-top: 20px;
+        }
+        .hero-cta {
+            margin-top: 40px;
         }
         .hero-services {
             margin-top: 32px;
@@ -227,7 +235,7 @@
             grid-template-columns: 1fr 1fr;
             border-bottom: var(--border);
         }
-        
+
         .manifesto-left { padding: 6vw 4vw; background: var(--black); color: var(--white); }
         .manifesto-left h2 { color: var(--white); }
 
@@ -246,7 +254,7 @@
 
         /* --- БЛОК 3: УСЛУГИ --- */
         .services-header { padding: 4vw; border-bottom: var(--border); }
-        
+
         .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
 
         .service-col {
@@ -254,7 +262,7 @@
             transition: var(--transition-fast); position: relative; background: var(--white);
         }
         .service-col:last-child { border-right: none; }
-        
+
         .service-col:hover { background: var(--black); color: var(--white); }
         .service-col:hover p { color: var(--gray-light); }
         .service-col:hover .mono-text { color: var(--white); }
@@ -268,7 +276,7 @@
 
         /* --- БЛОК 4: ПОРТФОЛИО (НОВАЯ АСИММЕТРИЧНАЯ СЕТКА) --- */
         .portfolio-header { padding: 4vw; border-bottom: var(--border); }
-        
+
         .portfolio-bento {
             display: grid;
             grid-template-columns: repeat(3, 1fr); /* 3 колонки */
@@ -425,11 +433,28 @@
             display: block;
         }
         .info-video { margin-top: 32px; }
+        .embed-frame {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+        }
+        .embed-frame iframe {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            inset: 0;
+            border: 0;
+        }
+        .metrika-pixel {
+            position: absolute;
+            left: -9999px;
+        }
 
         /* --- FOOTER CTA --- */
         .footer-cta { padding: 8vw 4vw; text-align: center; background: var(--black); color: var(--white); }
         .footer-cta h2 { color: var(--white); margin-bottom: 40px;}
-        
+        .footer-cta-label { color: var(--gray-light); margin-bottom: 20px; }
+
         .btn-giant {
             display: inline-block; background: var(--white); color: var(--black); padding: 30px 80px;
             font-size: 1.5rem; font-weight: 900; text-transform: uppercase; text-decoration: none;
@@ -443,13 +468,13 @@
             .hero-title-box, .hero-desc-box, .hero-photo-box { width: 100%; }
             .hero-desc-box { border-right: none; border-bottom: var(--border); }
             .hero-photo-box { min-height: 0; aspect-ratio: 1 / 1; border-bottom: var(--border); }
-            
+
             .manifesto { grid-template-columns: 1fr; }
             .blog-panel { grid-template-columns: 1fr; }
             .blog-panel-left { border-right: none; border-bottom: var(--border); }
             .info-panel { grid-template-columns: 1fr; }
             .info-left { border-right: none; border-bottom: var(--border); }
-            
+
             /* Сетка портфолио в&nbsp;2 колонки на&nbsp;планшете */
             .portfolio-bento { grid-template-columns: repeat(2, 1fr); }
             .ptf-card { grid-column: span 1 !important; border-right: var(--border) !important; }
@@ -460,7 +485,7 @@
         @media (max-width: 768px) {
             body { padding: 0; }
             .master-grid { border: none; border-bottom: var(--border);}
-            
+
             h1 {
                 font-size: clamp(2.2rem, 12.5vw, 3rem);
                 line-height: 0.92;
@@ -468,9 +493,9 @@
                 word-break: break-word;
             }
             h2 { font-size: 2.2rem; }
-            
+
             .btn-strict { padding: 20px 25px; font-size: 1.1rem; white-space: nowrap; }
-            
+
             .services-grid { grid-template-columns: 1fr; }
             .service-col { border-right: none; }
 
@@ -484,7 +509,7 @@
 </head>
 <body>
     <!-- Yandex.Metrika counter -->
-    <script type="text/javascript">
+    <script>
         (function(m,e,t,r,i,k,a){
             m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
             m[i].l=1*new Date();
@@ -494,18 +519,18 @@
 
         ym(107739439, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce:true, trackLinks:true});
     </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/107739439" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <noscript><div><img src="https://mc.yandex.ru/watch/107739439" class="metrika-pixel" alt=""></div></noscript>
     <!-- /Yandex.Metrika counter -->
 
     <div class="master-grid">
-        
+
         <!-- БЛОК 1: HERO -->
         <section class="hero">
             <div class="hero-title-box">
-                <div class="mono-text" style="margin-bottom: 20px;">[ СИСТЕМНАЯ ИНТЕГРАЦИЯ // V 2.0 ]</div>
+                <div class="mono-text section-kicker">[ СИСТЕМНАЯ ИНТЕГРАЦИЯ // V 2.0 ]</div>
                 <h1>ЦИФРОВОЙ ДВИГАТЕЛЬ<br>ДЛЯ&nbsp;ВАШЕГО БИЗНЕСА</h1>
             </div>
-            
+
             <div class="hero-desc-box">
                 <div>
                     <div class="hero-lead-wrap">
@@ -523,8 +548,8 @@
                         <li>Интеграции платежных систем, CRM и&nbsp;других сервисов</li>
                     </ul>
                 </div>
-                
-                <div style="margin-top: 40px;">
+
+                <div class="hero-cta">
                     <a href="https://t.me/nefedor" class="btn-strict" target="_blank" rel="noopener noreferrer">
                         <span>Заказать сайт</span>
                         <span class="arrow-icon">[ → ]</span>
@@ -541,7 +566,7 @@
         <!-- БЛОК 2: МАНИФЕСТ -->
         <section class="manifesto">
             <div class="manifesto-left">
-                <div class="mono-text" style="color: var(--gray-light); margin-bottom: 20px;">[ ПАРАДИГМА ]</div>
+                <div class="mono-text section-kicker section-kicker-muted">[ ПАРАДИГМА ]</div>
                 <h2>НИКАКОГО ХАОСА.<br>ТОЛЬКО СИСТЕМА, ПРИНОСЯЩАЯ ЗАЯВКИ.</h2>
             </div>
             <div class="manifesto-right">
@@ -555,9 +580,9 @@
             <div class="services-header">
                 <h2>МОДУЛИ СИСТЕМЫ</h2>
             </div>
-            
+
             <div class="services-grid">
-                
+
                 <div class="service-col">
                     <div class="service-icon-box">[ + ]</div>
                     <div class="mono-text service-num">MOD_01</div>
@@ -579,7 +604,7 @@
                     <p>Настройка кампаний и&nbsp;сквозной аналитики. Всегда кристально ясно, откуда приходят заявки и&nbsp;как снизить их стоимость.</p>
                 </div>
 
-                <div class="service-col" style="border-right: none;">
+                <div class="service-col">
                     <div class="service-icon-box">[ + ]</div>
                     <div class="mono-text service-num">MOD_04</div>
                     <h3>ДИЗАЙН БРЕНДА</h3>
@@ -596,7 +621,7 @@
             </div>
 
             <div class="portfolio-bento">
-                
+
                 <!-- Карточка 1 (Широкая, 2 колонки) -->
                 <a href="https://12storeez.com/" class="ptf-card" target="_blank" rel="noopener noreferrer">
                     <div class="ptf-img-slot has-image">
@@ -675,13 +700,13 @@
         <!-- БЛОК 5: БЛОГ -->
         <section class="blog-panel">
             <div class="blog-panel-left">
-                <div class="mono-text" style="color: var(--gray-light); margin-bottom: 20px;">[ ЖУРНАЛ // ПРАКТИКА ]</div>
-                <h2 style="margin-bottom: 20px;">ЗАМЕТКИ О&nbsp;САЙТАХ,<br>МАРКЕТИНГЕ И&nbsp;СИСТЕМАХ</h2>
+                <div class="mono-text section-kicker section-kicker-muted">[ ЖУРНАЛ // ПРАКТИКА ]</div>
+                <h2 class="section-heading-spaced">ЗАМЕТКИ О&nbsp;САЙТАХ,<br>МАРКЕТИНГЕ И&nbsp;СИСТЕМАХ</h2>
                 <p>Короткие разборы, наблюдения и&nbsp;практические решения для&nbsp;бизнеса, которому нужен не просто красивый экран, а работающий цифровой инструмент.</p>
             </div>
             <div class="blog-panel-right">
                 <div>
-                    <div class="mono-text" style="margin-bottom: 20px;">[ CONTENT PIPELINE // ONLINE ]</div>
+                    <div class="mono-text section-kicker">[ CONTENT PIPELINE // ONLINE ]</div>
                     <p>Блог собирается из Markdown-статей, а для&nbsp;каждого материала назначается свой заголовок, описание и&nbsp;картинка для&nbsp;shared link.</p>
                 </div>
                 <a href="/blog/" class="btn-strict">
@@ -693,10 +718,10 @@
 
         <!-- БЛОК 6: ИНФО-ПАНЕЛЬ -->
         <section class="info-panel">
-            
+
             <div class="info-left">
-                <div class="mono-text" style="margin-bottom: 20px;">[ СТАНДАРТИЗАЦИЯ ]</div>
-                <h2 style="margin-bottom: 20px; font-size: 2.5rem;">РАЗРАБОТКА ПО<br>АЛГОРИТМАМ РЫНКА</h2>
+                <div class="mono-text section-kicker">[ СТАНДАРТИЗАЦИЯ ]</div>
+                <h2 class="section-heading-medium">РАЗРАБОТКА ПО<br>АЛГОРИТМАМ РЫНКА</h2>
                 <p>Архитектура сайтов и&nbsp;рекламных кампаний выстраивается по&nbsp;строгим правилам главных IT-гигантов. Официальное признание (сертификация Яндекс Бизнес, статус эксперта ВКонтакте) — это гарантия того, что проект изначально создается без&nbsp;технических ошибок.</p>
                 <div class="info-certs">
                     <img src="./vkcert.jpg" alt="Сертификат ВКонтакте">
@@ -706,11 +731,11 @@
 
             <div class="info-right">
                 <div class="info-content">
-                    <div class="mono-text" style="margin-bottom: 20px;">[ ВНИМАНИЕ: ОТСУТСТВИЕ ДАННЫХ ]</div>
-                    <h2 style="margin-bottom: 20px; font-size: 2.5rem;">НЕТ СВОЕГО<br>КОНТЕНТА?</h2>
+                    <div class="mono-text section-kicker">[ ВНИМАНИЕ: ОТСУТСТВИЕ ДАННЫХ ]</div>
+                    <h2 class="section-heading-medium">НЕТ СВОЕГО<br>КОНТЕНТА?</h2>
                     <p>Если для&nbsp;сайта не хватает качественных фотографий товаров или&nbsp;видео — этот вопрос закрывается под&nbsp;ключ. Организация профессиональной предметной съемки гарантирует идеальную конверсию.</p>
                     <div class="info-video">
-                        <div style="position: relative; padding-top: 56.25%; width: 100%"><iframe src="https://kinescope.io/embed/spKTsa8wjQP4hTkPEzbJkk" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;" frameborder="0" allowfullscreen style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></iframe></div>
+                        <div class="embed-frame"><iframe src="https://kinescope.io/embed/spKTsa8wjQP4hTkPEzbJkk" title="Видео о создании контента для сайта" allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
                     </div>
                 </div>
             </div>
@@ -719,7 +744,7 @@
 
         <!-- FOOTER CTA -->
         <section class="footer-cta">
-            <div class="mono-text" style="color: var(--gray-light); margin-bottom: 20px;">[ ТЕРМИНАЛ СВЯЗИ ]</div>
+            <div class="mono-text footer-cta-label">[ ТЕРМИНАЛ СВЯЗИ ]</div>
             <h2>ГОТОВЫ ЗАПУСТИТЬ ПРОЦЕСС?</h2>
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
         </section>
