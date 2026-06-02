@@ -53,7 +53,7 @@ const BLOG_EXTRA_CSS = `
             justify-content: space-between;
             gap: 16px;
             width: 100%;
-            min-height: 44px;
+            height: 44px;
             padding: 0 16px;
             border: var(--border);
             color: var(--black);
@@ -65,7 +65,9 @@ const BLOG_EXTRA_CSS = `
             transition: var(--transition-fast);
         }
         .blog-nav-link:hover {
-            background: var(--bg-color);
+            background: var(--brand-red);
+            border-color: var(--brand-red);
+            color: var(--white);
         }
         .blog-list {
             display: grid;
@@ -223,6 +225,9 @@ const BLOG_EXTRA_CSS = `
             gap: 28px;
             padding: 36px 32px;
             border-bottom: var(--border);
+        }
+        .article-hero .blog-nav-link {
+            align-self: start;
         }
         .article-hero-main { max-width: 900px; }
         .article-hero h1 {
