@@ -115,8 +115,24 @@
         .btn-strict:hover { color: var(--white); border-color: var(--brand-red); }
         .btn-strict span { position: relative; z-index: 2; }
 
-        .arrow-icon { font-family: 'JetBrains Mono'; transition: var(--transition-fast); position: relative; z-index: 2;}
-        .btn-strict:hover .arrow-icon { transform: translateX(10px); color: var(--white);}
+        .arrow-icon {
+            position: relative;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 65px;
+            height: 35px;
+            transition: var(--transition-fast);
+        }
+        .arrow-icon img {
+            width: 65px;
+            height: 35px;
+            display: block;
+            transition: var(--transition-fast);
+        }
+        .btn-strict:hover .arrow-icon { transform: translateX(10px); }
+        .btn-strict:hover .arrow-icon img { filter: invert(1); }
 
         /* --- БЛОК 1: HERO --- */
         .hero {
@@ -552,7 +568,7 @@
                 <div class="hero-cta">
                     <a href="https://t.me/nefedor" class="btn-strict" target="_blank" rel="noopener noreferrer">
                         <span>Заказать сайт</span>
-                        <span class="arrow-icon">[ → ]</span>
+                        <span class="arrow-icon" aria-hidden="true"><img src="/arrow.svg" alt=""></span>
                     </a>
                 </div>
             </div>
@@ -711,7 +727,7 @@
                 </div>
                 <a href="/blog/" class="btn-strict">
                     <span>Открыть блог</span>
-                    <span class="arrow-icon">[ → ]</span>
+                    <span class="arrow-icon" aria-hidden="true"><img src="/arrow.svg" alt=""></span>
                 </a>
             </div>
         </section>
@@ -752,4 +768,3 @@
     </div>
     </body>
 </html>
-
