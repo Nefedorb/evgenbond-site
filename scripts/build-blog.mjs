@@ -74,8 +74,8 @@ const BLOG_EXTRA_CSS = `
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 36px;
-            height: 20px;
+            width: 28px;
+            height: 15px;
             flex: 0 0 auto;
         }
 
