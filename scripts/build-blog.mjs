@@ -226,12 +226,6 @@ const BLOG_EXTRA_CSS = `
         .blog-shell .footer-cta {
             padding: 40px 32px;
         }
-        .blog-shell .footer-cta h2 {
-            max-width: 760px;
-            margin: 0 auto 28px;
-            font-size: 2.4rem;
-            line-height: 0.95;
-        }
         .blog-shell .footer-cta .btn-giant {
             max-width: 520px;
             margin: 0 auto;
@@ -465,9 +459,6 @@ const BLOG_EXTRA_CSS = `
             .article-content { padding: 36px 22px 56px; }
             .blog-shell .footer-cta {
                 padding: 36px 22px;
-            }
-            .blog-shell .footer-cta h2 {
-                font-size: 2rem;
             }
             .blog-shell .footer-cta .btn-giant {
                 padding: 22px 18px;
@@ -1245,7 +1236,7 @@ ${cards}
         </section>
 ${renderPagination(currentPage, totalPages, getPagePath)}
         <section class="footer-cta">
-            <h2>ЕСТЬ ЗАДАЧА ДЛЯ САЙТА?</h2>
+            <div class="mono-text footer-cta-label">[ ТЕРМИНАЛ СВЯЗИ ]</div>
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
         </section>
     </div>`;
@@ -1292,7 +1283,7 @@ ${content}
             </div>
         </article>
         <section class="footer-cta">
-            <h2>НУЖЕН САЙТ С ТАКОЙ ЖЕ СИСТЕМОЙ?</h2>
+            <div class="mono-text footer-cta-label">[ ТЕРМИНАЛ СВЯЗИ ]</div>
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
         </section>
     </div>
