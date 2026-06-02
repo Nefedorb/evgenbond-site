@@ -69,6 +69,27 @@ const BLOG_EXTRA_CSS = `
             border-color: var(--brand-red);
             color: var(--white);
         }
+
+        .blog-nav-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 20px;
+            flex: 0 0 auto;
+        }
+
+        .blog-nav-icon img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            transform: scaleX(-1);
+            transition: var(--transition-fast);
+        }
+
+        .blog-nav-link:hover .blog-nav-icon img {
+            filter: invert(1);
+        }
         .blog-list {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1214,7 +1235,7 @@ ${renderCardMeta(post)}
             <p class="blog-page-summary">${escapeHtml(headerSummary)}</p>
             <a href="/" class="blog-nav-link">
                 <span>На главную</span>
-                <span>←</span>
+                <span class="blog-nav-icon" aria-hidden="true"><img src="/arrow.svg" alt=""></span>
             </a>
         </section>
         <section class="blog-list">
@@ -1261,7 +1282,7 @@ ${renderArticleMeta(post)}
                 </div>
                 <a href="/blog/" class="blog-nav-link">
                     <span>Все статьи</span>
-                    <span>←</span>
+                    <span class="blog-nav-icon" aria-hidden="true"><img src="/arrow.svg" alt=""></span>
                 </a>
             </header>
             ${cover}
