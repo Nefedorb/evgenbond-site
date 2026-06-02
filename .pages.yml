@@ -105,6 +105,10 @@ content:
               - name: caption
                 label: Подпись
                 type: string
+              - name: showBorder
+                label: Показывать рамку
+                type: boolean
+                default: true
               - name: size
                 label: Размер
                 type: select

@@ -315,6 +315,9 @@ const BLOG_EXTRA_CSS = `
             border: var(--border);
             display: block;
         }
+        .article-image-block.has-no-border img {
+            border: 0;
+        }
         .article-video-block {
             max-width: 880px;
         }
@@ -757,6 +760,7 @@ function validateBlock(block, sourceFile, index) {
       image: validateImage(block.image, sourceFile, `${blockPrefix}.image`),
       alt: requireString(block.alt, sourceFile, `${blockPrefix}.alt`),
       caption: typeof block.caption === "string" ? block.caption.trim() : "",
+      showBorder: block.showBorder !== false,
       size
     };
   }
@@ -1022,9 +1026,15 @@ function renderImageBlock(block) {
   const caption = block.caption
     ? `<figcaption class="article-image-caption mono-text">${escapeHtml(block.caption)}</figcaption>`
     : "";
+  const classes = [
+    "article-block",
+    "article-image-block",
+    block.size === "full" ? "is-full" : "",
+    block.showBorder === false ? "has-no-border" : ""
+  ].filter(Boolean).join(" ");
 
   return `
-                <figure class="article-block article-image-block${block.size === "full" ? " is-full" : ""}">
+                <figure class="${classes}">
                     <img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.alt)}" loading="lazy">
                     ${caption}
                 </figure>`;
