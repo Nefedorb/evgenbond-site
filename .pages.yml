@@ -46,19 +46,104 @@ content:
         options:
           minlength: 40
           maxlength: 180
+      - name: coverImage
+        label: Обложка для сетки и статьи
+        type: image
+        required: true
+        description: "Видимая картинка: используется в карточке блога и, если включено, в начале статьи."
+      - name: coverImageAlt
+        label: Alt-текст обложки
+        type: string
+        required: true
+      - name: showCoverInArticle
+        label: Показывать обложку в статье
+        type: boolean
+        required: true
+        default: true
       - name: sharedImage
         label: Картинка shared link
         type: image
         required: true
+        description: "Только для сниппетов соцсетей и мессенджеров. В самой статье не публикуется."
       - name: sharedImageAlt
-        label: Alt-текст картинки
+        label: Alt-текст shared link картинки
         type: string
         required: true
       - name: tags
         label: Теги
         type: string
         list: true
-      - name: body
-        label: Текст статьи
-        type: rich-text
+      - name: blocks
+        label: Блоки статьи
+        type: block
+        list: true
+        blockKey: type
         required: true
+        blocks:
+          - name: text
+            label: Текст
+            fields:
+              - name: body
+                label: Текстовый блок
+                type: rich-text
+                required: true
+                options:
+                  format: markdown
+                  switcher: true
+                  media: false
+          - name: image
+            label: Изображение
+            fields:
+              - name: image
+                label: Изображение
+                type: image
+                required: true
+              - name: alt
+                label: Alt-текст
+                type: string
+                required: true
+              - name: caption
+                label: Подпись
+                type: string
+              - name: size
+                label: Размер
+                type: select
+                default: normal
+                options:
+                  values:
+                    - name: normal
+                      label: Обычный
+                    - name: full
+                      label: На всю ширину
+          - name: code
+            label: Код
+            fields:
+              - name: language
+                label: Язык
+                type: string
+                description: "Например: html, css, javascript, powershell."
+              - name: caption
+                label: Подпись
+                type: string
+              - name: code
+                label: Код
+                type: code
+                required: true
+                options:
+                  format: markdown
+          - name: quote
+            label: Цитата
+            fields:
+              - name: text
+                label: Текст цитаты
+                type: text
+                required: true
+              - name: author
+                label: Автор
+                type: string
+          - name: divider
+            label: Разделитель
+            fields:
+              - name: label
+                label: Подпись
+                type: string

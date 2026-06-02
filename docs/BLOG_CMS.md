@@ -6,6 +6,7 @@
 - Онлайн-редактор: Pages CMS, конфигурация в `.pages.yml`.
 - Публикация: `npm run build` собирает статический сайт в `_site`.
 - GitHub Pages публикует `_site` через workflow `.github/workflows/pages.yml`.
+- Дизайн блога: компактная журнальная сетка карточек и блочная статья без большого hero.
 
 ## Главные файлы
 - `.pages.yml` - схема админки Pages CMS.
@@ -21,10 +22,23 @@
 - `date` - дата публикации.
 - `published` - если `false`, статья не попадает в сборку.
 - `description` - SEO и shared-link описание.
-- `sharedImage` - абсолютный путь к картинке, например `/assets/blog/post-cover.jpg`.
-- `sharedImageAlt` - alt-текст картинки.
+- `coverImage` - видимая обложка карточки в сетке блога.
+- `coverImageAlt` - alt-текст видимой обложки.
+- `showCoverInArticle` - показывает или скрывает `coverImage` в начале статьи.
+- `sharedImage` - картинка только для shared-link сниппетов, например `/assets/blog/post-share.jpg`; в теле статьи не выводится.
+- `sharedImageAlt` - alt-текст shared-link картинки.
 - `tags` - список тегов.
-- `body` - Markdown/Rich text тело статьи.
+- `blocks` - блочный конструктор статьи.
+
+## Блоки статьи
+- `text` - Markdown/Rich text блок для абзацев, заголовков, списков и ссылок.
+- `image` - отдельная картинка между текстовыми блоками; поля: `image`, `alt`, `caption`, `size`.
+- `code` - блок кода с кнопкой копирования; поля: `language`, `caption`, `code`.
+- `quote` - цитата; поля: `text`, `author`.
+- `divider` - визуальный разделитель с необязательной подписью.
+
+Старый формат с Markdown в `body` поддерживается генератором как fallback, но новые статьи лучше вести через `blocks`.
+Демо-статьи в `content/blog` опубликованы только для проверки плотной сетки; перед финальной редактурой их можно заменить реальными материалами или снять с публикации через `published: false`.
 
 ## Локальная проверка
 ```powershell
@@ -44,11 +58,12 @@ npm run dev
 2. Войти через GitHub.
 3. Выбрать репозиторий `Nefedorb/evgenbond-site`.
 4. Открыть коллекцию `Блог`.
-5. Создать статью, заполнить обязательные поля и загрузить shared-link картинку.
-6. Сохранение в CMS создаёт commit в GitHub; после этого GitHub Actions пересобирает сайт.
+5. Создать статью, заполнить обязательные поля, загрузить `coverImage` и `sharedImage`.
+6. Собрать материал из блоков: чередовать `text`, `image`, `quote`, `code` и `divider` в нужном порядке.
+7. Сохранение в CMS создаёт commit в GitHub; после этого GitHub Actions пересобирает сайт.
 
 ## Ограничения v1
 - Нет runtime backend и базы данных.
 - UI-фреймворки не используются.
 - `_site`, `node_modules`, `.vscode/sftp.json`, CSV, backup HTML и локальные артефакты не коммитятся.
-- Статья без `title`, `slug`, `date`, `description` или существующего `sharedImage` не должна молча попасть в публикацию.
+- Статья без `title`, `slug`, `date`, `description`, существующего `coverImage`, существующего `sharedImage` или контентных блоков не должна молча попасть в публикацию.
