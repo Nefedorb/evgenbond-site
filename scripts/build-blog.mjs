@@ -173,6 +173,9 @@ const BLOG_EXTRA_CSS = `
             text-decoration: underline;
             text-underline-offset: 3px;
         }
+        .blog-tag-separator {
+            color: var(--gray-dark);
+        }
         .blog-meta-dot {
             color: var(--gray-dark);
         }
@@ -1145,7 +1148,7 @@ function renderTagLinks(tags, { preview = false } = {}) {
 ${visibleTags.map((tag) => {
     const tagSlug = slugifyTag(tag);
     return `                                <a class="blog-tag" href="${escapeHtml(getTagPath(tagSlug))}">${escapeHtml(tag)}</a>`;
-  }).join("\n")}
+  }).join(`\n                                <span class="blog-tag-separator" aria-hidden="true">·</span>\n`)}
                             </span>`;
 }
 
@@ -1242,7 +1245,6 @@ ${cards}
         </section>
 ${renderPagination(currentPage, totalPages, getPagePath)}
         <section class="footer-cta">
-            <div class="mono-text footer-cta-label">[ ТЕРМИНАЛ СВЯЗИ ]</div>
             <h2>ЕСТЬ ЗАДАЧА ДЛЯ САЙТА?</h2>
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
         </section>
@@ -1290,7 +1292,6 @@ ${content}
             </div>
         </article>
         <section class="footer-cta">
-            <div class="mono-text footer-cta-label">[ ТЕРМИНАЛ СВЯЗИ ]</div>
             <h2>НУЖЕН САЙТ С ТАКОЙ ЖЕ СИСТЕМОЙ?</h2>
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
         </section>
