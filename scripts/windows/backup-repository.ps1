@@ -1,15 +1,31 @@
 [CmdletBinding()]
 param(
-    [string]$RepositoryPath = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path,
-    [string[]]$DestinationPaths = @(
-        (Join-Path $HOME "YandexDisk\Backups\evgenbond-site"),
-        (Join-Path $HOME "OneDrive\Backups\evgenbond-site")
-    ),
+    [string]$RepositoryPath,
+    [string[]]$DestinationPaths,
     [int]$RetentionCount = 30,
-    [string]$LogPath = (Join-Path $env:LOCALAPPDATA "EvgenbondSiteBackup\backup.log")
+    [string]$LogPath
 )
 
 $ErrorActionPreference = "Stop"
+
+$scriptDirectory = Split-Path -Parent $MyInvocation.MyCommand.Path
+$userProfile = [Environment]::GetFolderPath([Environment+SpecialFolder]::UserProfile)
+$localApplicationData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
+
+if ([string]::IsNullOrWhiteSpace($RepositoryPath)) {
+    $RepositoryPath = (Resolve-Path (Join-Path $scriptDirectory "..\..")).Path
+}
+
+if (-not $DestinationPaths -or $DestinationPaths.Count -eq 0) {
+    $DestinationPaths = @(
+        (Join-Path $userProfile "YandexDisk\Backups\evgenbond-site"),
+        (Join-Path $userProfile "OneDrive\Backups\evgenbond-site")
+    )
+}
+
+if ([string]::IsNullOrWhiteSpace($LogPath)) {
+    $LogPath = Join-Path $localApplicationData "EvgenbondSiteBackup\backup.log"
+}
 
 function Write-BackupLog {
     param(
