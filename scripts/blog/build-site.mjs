@@ -104,7 +104,11 @@ async function writeBlog(posts) {
           : `Тег: ${tagGroup.title}, страница ${pageNumber} — ${SITE_META_SUFFIX}`,
         pageDescription: `Все статьи с тегом «${tagGroup.title}».`,
         headerLabel: "Тег",
-        headerSummary: `Все статьи с тегом «${tagGroup.title}».`
+        headerSummary: `Все статьи с тегом «${tagGroup.title}».`,
+        pageKind: "tag",
+        breadcrumbLabel: pageNumber === 1
+          ? `Тег: ${tagGroup.title}`
+          : `Тег: ${tagGroup.title}, страница ${pageNumber}`
       });
       const pageDir = pageNumber === 1
         ? path.join(DIST, "blog", "tag", tagGroup.slug)

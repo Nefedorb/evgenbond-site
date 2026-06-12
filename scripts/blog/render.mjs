@@ -46,38 +46,167 @@ function getAuthorStructuredData() {
     "@type": "Person",
     "@id": `${SITE_URL}/#person`,
     name: AUTHOR_NAME,
-    url: `${SITE_URL}/`
+    url: `${SITE_URL}/`,
+    image: `${SITE_URL}/001.jpg`,
+    jobTitle: "Специалист по созданию сайтов и цифровому маркетингу",
+    sameAs: ["https://t.me/nefedor"]
   };
 }
 
-function getBlogStructuredData({ title, description, pagePath }) {
+function getWebsiteStructuredData() {
   return {
-    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${SITE_URL}/#website`,
+    url: `${SITE_URL}/`,
+    name: "evgenbond.ru",
+    description: SITE_TITLE,
+    inLanguage: "ru-RU",
+    author: { "@id": `${SITE_URL}/#person` }
+  };
+}
+
+function getBlogStructuredData() {
+  return {
     "@type": "Blog",
+    "@id": `${SITE_URL}/blog/#blog`,
+    name: `Блог — ${SITE_META_SUFFIX}`,
+    description: SITE_DESCRIPTION,
+    url: `${SITE_URL}/blog/`,
+    inLanguage: "ru-RU",
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+    author: { "@id": `${SITE_URL}/#person` },
+    publisher: { "@id": `${SITE_URL}/#person` }
+  };
+}
+
+function getBreadcrumbStructuredData(pagePath, items) {
+  const canonical = toAbsoluteUrl(pagePath);
+
+  return {
+    "@type": "BreadcrumbList",
+    "@id": `${canonical}#breadcrumb`,
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: toAbsoluteUrl(item.path)
+    }))
+  };
+}
+
+function getWebPageStructuredData({
+  type = "WebPage",
+  title,
+  description,
+  pagePath,
+  breadcrumb,
+  mainEntity,
+  about
+}) {
+  const canonical = toAbsoluteUrl(pagePath);
+
+  return {
+    "@type": type,
+    "@id": `${canonical}#webpage`,
+    url: canonical,
     name: title,
     description,
-    url: toAbsoluteUrl(pagePath),
     inLanguage: "ru-RU",
-    author: getAuthorStructuredData()
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+    breadcrumb: { "@id": breadcrumb["@id"] },
+    ...(mainEntity ? { mainEntity: { "@id": mainEntity } } : {}),
+    ...(about ? { about: { "@id": about } } : {})
   };
+}
+
+function createStructuredDataGraph(entities) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": entities
+  };
+}
+
+function getBlogPageStructuredData({
+  title,
+  description,
+  pagePath,
+  currentPage,
+  pageKind,
+  breadcrumbLabel
+}) {
+  const blog = getBlogStructuredData();
+  const breadcrumbItems = [
+    { name: "Главная", path: "/" },
+    { name: "Блог", path: "/blog/" }
+  ];
+
+  if (pagePath !== "/blog/") {
+    breadcrumbItems.push({ name: breadcrumbLabel, path: pagePath });
+  }
+
+  const breadcrumb = getBreadcrumbStructuredData(pagePath, breadcrumbItems);
+  const isCollectionPage = pageKind === "tag" || currentPage > 1;
+  const webpage = getWebPageStructuredData({
+    type: isCollectionPage ? "CollectionPage" : "WebPage",
+    title,
+    description,
+    pagePath,
+    breadcrumb,
+    mainEntity: isCollectionPage ? undefined : blog["@id"],
+    about: isCollectionPage ? blog["@id"] : undefined
+  });
+
+  return createStructuredDataGraph([
+    getAuthorStructuredData(),
+    getWebsiteStructuredData(),
+    blog,
+    webpage,
+    breadcrumb
+  ]);
 }
 
 function getPostStructuredData(post) {
-  const canonical = toAbsoluteUrl(`/blog/${post.slug}/`);
-
-  return {
-    "@context": "https://schema.org",
+  const pagePath = `/blog/${post.slug}/`;
+  const canonical = toAbsoluteUrl(pagePath);
+  const articleId = `${canonical}#article`;
+  const breadcrumb = getBreadcrumbStructuredData(pagePath, [
+    { name: "Главная", path: "/" },
+    { name: "Блог", path: "/blog/" },
+    { name: post.title, path: pagePath }
+  ]);
+  const webpage = getWebPageStructuredData({
+    title: post.title,
+    description: post.description,
+    pagePath,
+    breadcrumb,
+    mainEntity: articleId
+  });
+  const article = {
     "@type": "BlogPosting",
+    "@id": articleId,
     headline: post.title,
     description: post.description,
     datePublished: post.dateIso,
-    mainEntityOfPage: canonical,
+    mainEntityOfPage: { "@id": webpage["@id"] },
     url: canonical,
     image: toAbsoluteUrl(post.sharedImage),
     keywords: post.tags,
+    articleSection: post.tags,
+    isAccessibleForFree: true,
     inLanguage: "ru-RU",
-    author: getAuthorStructuredData()
+    isPartOf: { "@id": `${SITE_URL}/blog/#blog` },
+    author: { "@id": `${SITE_URL}/#person` },
+    publisher: { "@id": `${SITE_URL}/#person` }
   };
+
+  return createStructuredDataGraph([
+    getAuthorStructuredData(),
+    getWebsiteStructuredData(),
+    getBlogStructuredData(),
+    webpage,
+    article,
+    breadcrumb
+  ]);
 }
 
 function renderHead({ title, description, path: pagePath, image, imageAlt, type = "website", structuredData }) {
@@ -398,7 +527,9 @@ export function renderBlogIndex(posts, {
   pageTitle = currentPage === 1 ? `Блог — ${SITE_META_SUFFIX}` : `Блог, страница ${currentPage} — ${SITE_META_SUFFIX}`,
   pageDescription = SITE_DESCRIPTION,
   headerLabel = "Блог",
-  headerSummary = SITE_DESCRIPTION
+  headerSummary = SITE_DESCRIPTION,
+  pageKind = "blog",
+  breadcrumbLabel = currentPage > 1 ? `Страница ${currentPage}` : "Блог"
 } = {}) {
   const cards = posts.length
     ? posts.map((post) => `
@@ -448,10 +579,13 @@ ${renderPagination(currentPage, totalPages, getPagePath)}
       path: pagePath,
       image: "/sharedlink.jpg",
       imageAlt: SITE_TITLE,
-      structuredData: getBlogStructuredData({
+      structuredData: getBlogPageStructuredData({
         title: pageTitle,
         description: pageDescription,
-        pagePath
+        pagePath,
+        currentPage,
+        pageKind,
+        breadcrumbLabel
       })
     }),
     body
