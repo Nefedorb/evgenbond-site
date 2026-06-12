@@ -389,14 +389,16 @@ const BLOG_EXTRA_CSS = `
         .article-video-frame {
             width: 100%;
             aspect-ratio: 16 / 9;
-            border: var(--border);
-            background: var(--black);
+            border: 1px solid #D8D8D8;
+            border-radius: 10px;
+            background: var(--white);
             display: block;
             overflow: hidden;
         }
         .article-video-frame iframe {
-            width: 100%;
-            height: 100%;
+            width: calc(100% + 2px);
+            height: calc(100% + 2px);
+            margin: -1px;
             border: 0;
             display: block;
         }
