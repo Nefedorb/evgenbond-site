@@ -6,24 +6,27 @@ The project has three copies of committed data:
 
 1. the local Git repository;
 2. the GitHub repository `Nefedorb/evgenbond-site`;
-3. daily full Git bundles in Yandex Disk and OneDrive.
+3. weekly full Git bundles stored locally and sent to Telegram through `bondfilebot`.
 
 Pages CMS stores articles and uploaded images as Git commits, so they are included in the same history. Generated `_site`, `node_modules`, ignored local files, secrets, and uncommitted changes are not included.
 
 ## Automatic backup
 
-Windows Scheduled Task `Evgenbond-Site-Backup` runs every day at 03:00 and starts later if the computer was unavailable. It executes:
+Windows Scheduled Task `Evgenbond-Site-Backup` runs every Sunday at 03:00 and starts later if the computer was unavailable. It executes:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File D:\code\333\scripts\windows\backup-repository.ps1
 ```
 
-Destinations:
+The latest 30 local backups are stored in:
 
-- `%USERPROFILE%\YandexDisk\Backups\evgenbond-site`
-- `%USERPROFILE%\OneDrive\Backups\evgenbond-site`
+```text
+%LOCALAPPDATA%\EvgenbondSiteBackup\archives
+```
 
-Each destination keeps the latest 30 `.bundle` files and their `.sha256` checksums. The log is stored at:
+Each successful run also uploads the `.bundle` file to the private Telegram chat with `bondfilebot`. The script reads the selected `TelegramDOC` uploader from the local ShareX configuration. The bot token and chat ID remain in the ShareX profile and are not copied to this repository or backup log.
+
+The log is stored at:
 
 ```text
 %LOCALAPPDATA%\EvgenbondSiteBackup\backup.log
@@ -72,6 +75,8 @@ GitHub Actions will rebuild and publish the reverted version.
 
 ## Restore the complete repository from a bundle
 
+Use a local `.bundle`, or download the required file from the chat with `bondfilebot`. The Telegram message caption contains the commit SHA and SHA-256 checksum.
+
 Verify the checksum and bundle:
 
 ```powershell
@@ -79,7 +84,7 @@ Get-FileHash -Algorithm SHA256 .\evgenbond-site-YYYYMMDD-HHMMSS.bundle
 git bundle verify .\evgenbond-site-YYYYMMDD-HHMMSS.bundle
 ```
 
-Compare the SHA-256 value with the adjacent `.sha256` file, then clone:
+Compare the SHA-256 value with the adjacent `.sha256` file or the Telegram caption, then clone:
 
 ```powershell
 git clone .\evgenbond-site-YYYYMMDD-HHMMSS.bundle evgenbond-site-restored
@@ -95,4 +100,4 @@ If the GitHub repository was deleted, create an empty replacement first and use 
 
 ## Information stored separately
 
-Keep access to the domain registrar, DNS configuration, GitHub account recovery codes, and cloud account recovery methods outside this repository. Never add passwords, tokens, recovery codes, or private keys to Git or backup documentation.
+Keep access to the domain registrar, DNS configuration, GitHub account recovery codes, Telegram account, and ShareX uploader configuration outside this repository. Never add passwords, tokens, recovery codes, or private keys to Git or backup documentation.

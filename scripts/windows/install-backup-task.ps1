@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$TaskName = "Evgenbond-Site-Backup",
-    [datetime]$DailyAt = [datetime]::Today.AddHours(3)
+    [datetime]$WeeklyAt = [datetime]::Today.AddHours(3)
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,7 +11,7 @@ $powerShell = (Get-Command powershell.exe).Source
 $arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$backupScript`""
 
 $action = New-ScheduledTaskAction -Execute $powerShell -Argument $arguments -WorkingDirectory (Split-Path -Parent $backupScript)
-$trigger = New-ScheduledTaskTrigger -Daily -At $DailyAt
+$trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At $WeeklyAt
 $settings = New-ScheduledTaskSettingsSet `
     -StartWhenAvailable `
     -AllowStartIfOnBatteries `
@@ -25,7 +25,7 @@ Register-ScheduledTask `
     -Trigger $trigger `
     -Settings $settings `
     -Principal $principal `
-    -Description "Daily verified Git bundle backup of evgenbond-site to Yandex Disk and OneDrive." `
+    -Description "Weekly verified Git bundle backup of evgenbond-site to local storage and bondfilebot." `
     -Force | Out-Null
 
 Write-Output "Scheduled task '$TaskName' installed. Next run: $((Get-ScheduledTaskInfo -TaskName $TaskName).NextRunTime)"
