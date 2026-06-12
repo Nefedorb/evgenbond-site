@@ -83,6 +83,29 @@
         .section-heading-spaced { margin-bottom: 20px; }
         .section-heading-medium { margin-bottom: 20px; font-size: 2.5rem; }
 
+        .hero-blog-badge {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            margin-bottom: 20px;
+            padding: 10px 14px;
+            border: 1px solid var(--brand-red);
+            background: var(--brand-red);
+            color: var(--white);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: var(--transition-fast);
+        }
+        .hero-blog-badge:hover,
+        .hero-blog-badge:focus-visible {
+            background: var(--white);
+            color: var(--brand-red);
+        }
+        .hero-blog-badge:focus-visible {
+            outline: 3px solid var(--black);
+            outline-offset: 3px;
+        }
+
         .btn-strict {
             display: inline-flex;
             justify-content: space-between;
@@ -543,7 +566,7 @@
         <!-- БЛОК 1: HERO -->
         <section class="hero">
             <div class="hero-title-box">
-                <div class="mono-text section-kicker">[ СИСТЕМНАЯ ИНТЕГРАЦИЯ // V 2.0 ]</div>
+                <a href="/blog/" class="mono-text hero-blog-badge">ЧИТАТЬ БЛОГ</a>
                 <h1>ЦИФРОВОЙ ДВИГАТЕЛЬ<br>ДЛЯ&nbsp;ВАШЕГО БИЗНЕСА</h1>
             </div>
 
