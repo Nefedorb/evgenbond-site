@@ -1,6 +1,6 @@
 # Project State
 
-Дата снимка: 2026-06-02.
+Дата снимка: 2026-06-12.
 
 ## Где мы
 - Проект: статический персональный сайт `D:\code\333`.
@@ -8,9 +8,9 @@
 - Прод: GitHub Pages, custom domain `evgenbond.ru`, HTTPS включён.
 - Деплой: push в `main` запускает workflow `.github/workflows/pages.yml`.
 - Локальная точка входа: `index.html`.
-- Блог: Markdown-файлы в `content/blog`, сборка через `scripts/build-blog.mjs` в `_site/blog`.
+- Блог: Markdown-файлы в `content/blog`, сборка через модули `scripts/blog/` в `_site/blog`.
 - CMS: Pages CMS через `.pages.yml`, публичная точка входа `/admin/`.
-- Шрифт сайта и блога: Google Font `Inter Tight`; mono-элементы на `JetBrains Mono`.
+- Шрифты `Inter Tight` и `JetBrains Mono` хранятся локально в WOFF2.
 - Единственный агентский регламент: `skills/agents.md`.
 
 ## Что сделано
@@ -29,13 +29,23 @@
 - Добавлена статическая пагинация блога по 6 статей на страницу.
 - Добавлены видео-блоки для YouTube, Kinescope и безопасного custom HTTPS embed URL.
 - Видео-блоки оформлены светлой рамкой со скруглением без чёрных углов контейнера.
+- Главная использует адаптивные WebP-изображения; hover-портрет не загружается на touch-устройствах.
+- Kinescope на главной загружается только после клика по локальному превью.
+- Стили разделены на `base.css`, `home.css`, `blog.css`, `policy.css` и `cookie-consent.css`.
+- На главной, блоге и статьях добавлены JSON-LD и семантический `<main>`.
+- Добавлены проверки `node:test`, команды `npm test` и `npm run check`.
 - В code-блоках есть кнопка копирования.
 - В blog-навигации используются SVG-иконки `/arrow.svg`.
 - Футер блога: оставлен label `[ ТЕРМИНАЛ СВЯЗИ ]`, большой CTA-заголовок убран.
 
 ## Актуальные файлы
 - `.pages.yml` - схема Pages CMS.
-- `scripts/build-blog.mjs` - генератор блога, HTML/CSS блога, валидация контента.
+- `scripts/build-blog.mjs` - короткая точка запуска сборки.
+- `scripts/blog/content.mjs` - чтение и валидация контента.
+- `scripts/blog/render.mjs` - HTML-рендеринг.
+- `scripts/blog/seo.mjs` - sitemap, robots и SEO.
+- `scripts/blog/build-site.mjs` - сборка `_site`.
+- `assets/site/*.css` - общие и страничные стили.
 - `docs/BLOG_CMS.md` - инструкция по CMS и структуре статей.
 - `content/blog/*.md` - статьи.
 - `assets/blog/*` - загруженные через Pages CMS изображения.
@@ -43,7 +53,7 @@
 - `skills/agents.md` - локальный агентский регламент проекта.
 
 ## Проверено
-- `npm run build` успешно собирает `_site`.
+- `npm run check` успешно собирает `_site` и запускает тесты.
 - Последний деплой GitHub Pages после CMS-правок и обновлений генератора успешен.
 - Публичные URL работают:
   - `https://evgenbond.ru/`
@@ -63,6 +73,8 @@
 cd D:\code\333
 git status --short
 npm run build
+npm test
+npm run check
 npm run dev
 ```
 

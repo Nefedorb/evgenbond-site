@@ -1,0 +1,145 @@
+@font-face {
+    font-family: "Inter Tight";
+    font-style: normal;
+    font-weight: 200 900;
+    font-display: swap;
+    src: url("/assets/site/fonts/inter-tight-cyrillic.woff2") format("woff2");
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+    font-family: "Inter Tight";
+    font-style: normal;
+    font-weight: 200 900;
+    font-display: swap;
+    src: url("/assets/site/fonts/inter-tight-latin.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("/assets/site/fonts/jetbrains-mono-cyrillic.woff2") format("woff2");
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+    font-family: "JetBrains Mono";
+    font-style: normal;
+    font-weight: 400 700;
+    font-display: swap;
+    src: url("/assets/site/fonts/jetbrains-mono-latin.woff2") format("woff2");
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+        U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191,
+        U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+    --bg-color: #F4F4F4;
+    --white: #FFFFFF;
+    --black: #0D0D0D;
+    --brand-red: #C80000;
+    --gray-dark: #333333;
+    --gray-light: #CCCCCC;
+
+    --border: 1px solid var(--black);
+    --border-thick: 3px solid var(--black);
+
+    --transition-fast: 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+    --transition-slow: 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-color);
+    color: var(--black);
+    font-family: 'Inter Tight', sans-serif;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    padding: 2vw;
+    overflow-x: hidden;
+}
+
+::selection { background: var(--black); color: var(--white); }
+
+.master-grid {
+    border: var(--border);
+    background: var(--white);
+    max-width: 1800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+h1, h2, h3 { font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; }
+
+h1 { font-size: clamp(3rem, 7vw, 7rem); line-height: 0.85; margin-bottom: 20px;}
+h2 { font-size: clamp(2rem, 4vw, 4rem); line-height: 0.9; }
+h3 { font-size: 1.5rem; margin-bottom: 10px; }
+
+p { font-size: 1.1rem; font-weight: 400; color: var(--gray-dark); }
+
+.mono-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.section-kicker { margin-bottom: 20px; }
+.section-kicker-muted { color: var(--gray-light); }
+.section-heading-spaced { margin-bottom: 20px; }
+.section-heading-medium { margin-bottom: 20px; font-size: 2.5rem; }
+
+.footer-cta {
+    padding: 8vw 4vw;
+    text-align: center;
+    background: var(--black);
+    color: var(--white);
+}
+
+.footer-cta h2 {
+    color: var(--white);
+    margin-bottom: 40px;
+}
+
+.footer-cta-label {
+    color: var(--gray-light);
+    margin-bottom: 20px;
+}
+
+.btn-giant {
+    display: inline-block;
+    padding: 30px 80px;
+    border: 2px solid var(--white);
+    background: var(--white);
+    color: var(--black);
+    font-size: 1.5rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.btn-giant:hover {
+    background: var(--black);
+    color: var(--white);
+}
+
+@media (max-width: 768px) {
+    body { padding: 0; }
+    .master-grid { border: none; border-bottom: var(--border); }
+
+    h1 {
+        font-size: clamp(2.2rem, 12.5vw, 3rem);
+        line-height: 0.92;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    h2 { font-size: 2.2rem; }
+}

@@ -10,12 +10,13 @@
 
 ## Текущая архитектура
 
-- Главная страница: `index.html` с локальными HTML и CSS.
+- Главная страница: `index.html` и стили `assets/site/base.css`,
+  `assets/site/home.css`.
 - Блог: Markdown-файлы в `content/blog/*.md`.
 - Изображения блога: `assets/blog/`.
 - CMS: Pages CMS, схема хранится в `.pages.yml`.
 - Вход в CMS: `admin/index.html`.
-- Генератор: `scripts/build-blog.mjs`.
+- Генератор: `scripts/build-blog.mjs` и модули `scripts/blog/`.
 - Результат сборки: `_site/`.
 - Публикация: GitHub Pages через `.github/workflows/pages.yml`.
 - Домен: `evgenbond.ru`, конфигурация в `CNAME`.
@@ -75,7 +76,7 @@
   автоматическую проверку:
 
 ```powershell
-npm run build
+npm run check
 ```
 
 - Для интерфейсных изменений агент по возможности самостоятельно выполняет
