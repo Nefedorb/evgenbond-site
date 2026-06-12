@@ -272,6 +272,9 @@ const BLOG_EXTRA_CSS = `
             display: block;
             margin: 0 auto;
         }
+        .article-cover.has-no-border img {
+            border: 0;
+        }
         .article-content {
             padding: 48px 32px 72px;
         }
@@ -317,6 +320,65 @@ const BLOG_EXTRA_CSS = `
         }
         .article-image-block.has-no-border img {
             border: 0;
+        }
+        .article-cover img,
+        .article-image-block img,
+        .article-text-block img {
+            cursor: zoom-in;
+        }
+        .article-cover img:focus-visible,
+        .article-image-block img:focus-visible,
+        .article-text-block img:focus-visible {
+            outline: 3px solid var(--brand-red);
+            outline-offset: 4px;
+        }
+        .image-lightbox {
+            width: 100vw;
+            max-width: none;
+            height: 100vh;
+            max-height: none;
+            margin: 0;
+            padding: 56px 24px 24px;
+            border: 0;
+            background: rgba(13, 13, 13, 0.96);
+            color: var(--white);
+            overflow: hidden;
+        }
+        .image-lightbox::backdrop {
+            background: rgba(13, 13, 13, 0.96);
+        }
+        .image-lightbox[open] {
+            display: grid;
+            place-items: center;
+        }
+        .image-lightbox img {
+            display: block;
+            width: auto;
+            max-width: 100%;
+            height: auto;
+            max-height: calc(100vh - 80px);
+            object-fit: contain;
+        }
+        .image-lightbox-close {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--white);
+            background: var(--black);
+            color: var(--white);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+        .image-lightbox-close:hover,
+        .image-lightbox-close:focus-visible {
+            border-color: var(--brand-red);
+            background: var(--brand-red);
+            outline: none;
         }
         .article-video-block {
             max-width: 880px;
@@ -864,6 +926,7 @@ function validatePost(frontmatter, rawBody, sourceFile) {
     coverImage,
     coverImageAlt,
     showCoverInArticle: frontmatter.showCoverInArticle !== false,
+    showCoverBorder: frontmatter.showCoverBorder !== false,
     sharedImage,
     sharedImageAlt: frontmatter.sharedImageAlt.trim(),
     tags,
@@ -1092,9 +1155,55 @@ ${renderMarkdownBlock(block.body)}
   }).join("");
 }
 
-function renderCopyCodeScript() {
+function renderArticleInteractionScript() {
   return `
     <script>
+      const zoomableImages = document.querySelectorAll(
+        ".article-cover img, .article-image-block img, .article-text-block img"
+      );
+      const lightbox = document.createElement("dialog");
+      const lightboxImage = document.createElement("img");
+      const closeButton = document.createElement("button");
+
+      lightbox.className = "image-lightbox";
+      lightbox.setAttribute("aria-label", "Полноэкранный просмотр изображения");
+      closeButton.className = "image-lightbox-close";
+      closeButton.type = "button";
+      closeButton.setAttribute("aria-label", "Закрыть изображение");
+      closeButton.textContent = "×";
+      lightbox.append(lightboxImage, closeButton);
+      document.body.appendChild(lightbox);
+
+      const openLightbox = (image) => {
+        lightboxImage.src = image.currentSrc || image.src;
+        lightboxImage.alt = image.alt || "";
+        lightbox.showModal();
+      };
+
+      zoomableImages.forEach((image) => {
+        image.tabIndex = 0;
+        image.setAttribute("role", "button");
+        image.setAttribute("aria-label", image.alt
+          ? "Открыть изображение на весь экран: " + image.alt
+          : "Открыть изображение на весь экран");
+
+        image.addEventListener("click", () => openLightbox(image));
+        image.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          openLightbox(image);
+        });
+      });
+
+      closeButton.addEventListener("click", () => lightbox.close());
+      lightbox.addEventListener("click", (event) => {
+        if (event.target === lightbox) lightbox.close();
+      });
+      lightbox.addEventListener("close", () => {
+        lightboxImage.removeAttribute("src");
+        lightboxImage.alt = "";
+      });
+
       document.addEventListener("click", async (event) => {
         const button = event.target.closest(".copy-code-button");
         if (!button) return;
@@ -1268,7 +1377,7 @@ function renderPost(post, style) {
   const content = renderArticleBlocks(post.blocks);
   const cover = post.showCoverInArticle
     ? `
-            <div class="article-cover">
+            <div class="article-cover${post.showCoverBorder ? "" : " has-no-border"}">
                 <img src="${escapeHtml(post.coverImage)}" alt="${escapeHtml(post.coverImageAlt)}">
             </div>`
     : "";
@@ -1297,7 +1406,7 @@ ${content}
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
         </section>
     </div>
-${renderCopyCodeScript()}`;
+${renderArticleInteractionScript()}`;
 
   return renderPage({
     head: renderHead({
