@@ -429,31 +429,7 @@
         .ptf-card:hover .ptf-desc { color: var(--gray-light); }
         .ptf-card:hover .mono-text { color: var(--gray-light); }
 
-        /* --- БЛОК 5: БЛОГ --- */
-        .blog-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            border-bottom: var(--border);
-        }
-        .blog-panel-left {
-            padding: 6vw 4vw;
-            background: var(--black);
-            color: var(--white);
-            border-right: var(--border);
-        }
-        .blog-panel-left h2,
-        .blog-panel-left p { color: var(--white); }
-        .blog-panel-right {
-            padding: 6vw 4vw;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            gap: 32px;
-            background: var(--white);
-        }
-        .blog-panel-right p { max-width: 60ch; }
-
-        /* --- БЛОК 6: СТАНДАРТЫ --- */
+        /* --- БЛОК 5: СТАНДАРТЫ --- */
         .info-panel { display: grid; grid-template-columns: 1fr 1fr; }
         .info-left { padding: 6vw 4vw; border-right: var(--border); }
         .info-right { padding: 6vw 4vw; background: var(--bg-color); position: relative; }
@@ -509,8 +485,6 @@
             .hero-photo-box { min-height: 0; aspect-ratio: 1 / 1; border-bottom: var(--border); }
 
             .manifesto { grid-template-columns: 1fr; }
-            .blog-panel { grid-template-columns: 1fr; }
-            .blog-panel-left { border-right: none; border-bottom: var(--border); }
             .info-panel { grid-template-columns: 1fr; }
             .info-left { border-right: none; border-bottom: var(--border); }
 
@@ -722,26 +696,7 @@
             </div>
         </section>
 
-        <!-- БЛОК 5: БЛОГ -->
-        <section class="blog-panel">
-            <div class="blog-panel-left">
-                <div class="mono-text section-kicker section-kicker-muted">[ ЖУРНАЛ // ПРАКТИКА ]</div>
-                <h2 class="section-heading-spaced">ЗАМЕТКИ О&nbsp;САЙТАХ,<br>МАРКЕТИНГЕ И&nbsp;СИСТЕМАХ</h2>
-                <p>Короткие разборы, наблюдения и&nbsp;практические решения для&nbsp;бизнеса, которому нужен не просто красивый экран, а работающий цифровой инструмент.</p>
-            </div>
-            <div class="blog-panel-right">
-                <div>
-                    <div class="mono-text section-kicker">[ CONTENT PIPELINE // ONLINE ]</div>
-                    <p>Блог собирается из Markdown-статей, а для&nbsp;каждого материала назначается свой заголовок, описание и&nbsp;картинка для&nbsp;shared link.</p>
-                </div>
-                <a href="/blog/" class="btn-strict">
-                    <span>Открыть блог</span>
-                    <span class="arrow-icon" aria-hidden="true"><img src="/arrow.svg" alt=""></span>
-                </a>
-            </div>
-        </section>
-
-        <!-- БЛОК 6: ИНФО-ПАНЕЛЬ -->
+        <!-- БЛОК 5: ИНФО-ПАНЕЛЬ -->
         <section class="info-panel">
 
             <div class="info-left">
