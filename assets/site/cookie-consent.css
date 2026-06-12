@@ -1,0 +1,102 @@
+.cookie-consent {
+    position: fixed;
+    z-index: 10000;
+    right: max(16px, 2vw);
+    bottom: max(16px, 2vw);
+    left: max(16px, 2vw);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px;
+    align-items: center;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 20px 22px;
+    color: #0d0d0d;
+    background: #fff;
+    border: 1px solid #0d0d0d;
+    box-shadow: 8px 8px 0 rgba(13, 13, 13, 0.18);
+}
+
+.cookie-consent__text {
+    margin: 0;
+    font-family: "Inter Tight", sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+.cookie-consent__link {
+    color: #c80000;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.cookie-consent__link:hover {
+    color: #0d0d0d;
+}
+
+.cookie-consent__accept {
+    min-width: 132px;
+    padding: 14px 22px;
+    color: #fff;
+    background: #c80000;
+    border: 2px solid #c80000;
+    border-radius: 0;
+    font: 700 0.82rem/1 "JetBrains Mono", monospace;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.cookie-consent__accept:hover {
+    color: #c80000;
+    background: #fff;
+}
+
+.cookie-consent__accept:focus-visible,
+.cookie-consent__link:focus-visible {
+    outline: 3px solid #0d0d0d;
+    outline-offset: 3px;
+}
+
+.legal-links {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    font: 400 0.72rem/1.4 "JetBrains Mono", monospace;
+}
+
+.legal-links a {
+    color: #ccc;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s ease;
+}
+
+.legal-links a:hover,
+.legal-links a:focus-visible {
+    color: #fff;
+}
+
+.legal-links a:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+}
+
+@media (max-width: 720px) {
+    .cookie-consent {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 18px;
+        box-shadow: 5px 5px 0 rgba(13, 13, 13, 0.18);
+    }
+
+    .cookie-consent__text {
+        font-size: 0.82rem;
+    }
+
+    .cookie-consent__accept {
+        width: 100%;
+    }
+}

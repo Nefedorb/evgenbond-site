@@ -968,7 +968,7 @@ async function copyDirectory(source, target) {
 
 async function copyPublicAssets() {
   const entries = await fs.readdir(ROOT, { withFileTypes: true });
-  const publicDirectories = new Set(["assets", "admin"]);
+  const publicDirectories = new Set(["assets", "admin", "cookie-policy"]);
 
   for (const entry of entries) {
     const sourcePath = path.join(ROOT, entry.name);
@@ -1031,7 +1031,9 @@ function renderHead({ title, description, path: pagePath, image, imageAlt, type 
     <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">`;
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/site/cookie-consent.css">
+    <script defer src="/assets/site/cookie-consent.js"></script>`;
 }
 
 function renderPage({ head, style, body }) {
@@ -1359,6 +1361,7 @@ ${renderPagination(currentPage, totalPages, getPagePath)}
         <section class="footer-cta">
             <div class="mono-text footer-cta-label">[ ТЕРМИНАЛ СВЯЗИ ]</div>
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
+            <div class="legal-links"><a href="/cookie-policy/">Политика использования Cookie-файлов</a></div>
         </section>
     </div>`;
 
@@ -1406,6 +1409,7 @@ ${content}
         <section class="footer-cta">
             <div class="mono-text footer-cta-label">[ ТЕРМИНАЛ СВЯЗИ ]</div>
             <a href="https://t.me/nefedor" class="btn-giant" target="_blank" rel="noopener noreferrer">НАПИСАТЬ В&nbsp;TELEGRAM</a>
+            <div class="legal-links"><a href="/cookie-policy/">Политика использования Cookie-файлов</a></div>
         </section>
     </div>
 ${renderArticleInteractionScript()}`;
