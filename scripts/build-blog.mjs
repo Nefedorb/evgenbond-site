@@ -1029,9 +1029,8 @@ function renderHead({ title, description, path: pagePath, image, imageAlt, type 
     <meta name="twitter:image" content="${absoluteImage}">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="/assets/site/fonts/inter-tight-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/assets/site/fonts.css">
     <link rel="stylesheet" href="/assets/site/cookie-consent.css">
     <script defer src="/assets/site/cookie-consent.js"></script>`;
 }
