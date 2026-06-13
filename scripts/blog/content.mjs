@@ -1,8 +1,18 @@
-import { existsSync } from "node:fs";
+import { existsSync, statSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
 import { BLOG_DIR, ROOT, SITE_URL } from "./config.mjs";
+
+const DOWNLOAD_DIRECTORY = "/assets/downloads/";
+const MAX_DOWNLOAD_SIZE = 20 * 1024 * 1024;
+const DOWNLOAD_EXTENSIONS = new Set([
+  "pdf", "doc", "docx", "rtf", "odt",
+  "xls", "xlsx", "ods", "csv",
+  "ppt", "pptx", "odp",
+  "txt", "md", "html", "htm", "json", "xml",
+  "zip"
+]);
 
 export function escapeHtml(value) {
   return String(value ?? "")
@@ -230,6 +240,57 @@ function requireString(value, sourceFile, fieldName) {
   return value.trim();
 }
 
+function validateDownload(downloadPath, sourceFile, fieldName) {
+  const normalizedPath = requireString(downloadPath, sourceFile, fieldName);
+
+  if (
+    /^https?:\/\//i.test(normalizedPath) ||
+    !normalizedPath.startsWith(DOWNLOAD_DIRECTORY) ||
+    normalizedPath.includes("..") ||
+    normalizedPath.includes("?") ||
+    normalizedPath.includes("#")
+  ) {
+    throw new Error(
+      `${sourceFile}: ${fieldName} должен быть локальным путём внутри ${DOWNLOAD_DIRECTORY}`
+    );
+  }
+
+  const fileName = path.posix.basename(normalizedPath);
+  const extension = path.posix.extname(fileName).slice(1).toLowerCase();
+
+  if (!DOWNLOAD_EXTENSIONS.has(extension)) {
+    throw new Error(`${sourceFile}: ${fieldName} использует запрещённый формат .${extension || "(без расширения)"}`);
+  }
+
+  const localPath = path.join(ROOT, normalizedPath.replace(/^\/+/, ""));
+  const relative = path.relative(ROOT, localPath);
+
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`${sourceFile}: ${fieldName} выходит за пределы проекта`);
+  }
+
+  if (!existsSync(localPath)) {
+    throw new Error(`${sourceFile}: файл для скачивания не найден: ${normalizedPath}`);
+  }
+
+  const stats = statSync(localPath);
+
+  if (!stats.isFile()) {
+    throw new Error(`${sourceFile}: ${fieldName} должен указывать на файл`);
+  }
+
+  if (stats.size > MAX_DOWNLOAD_SIZE) {
+    throw new Error(`${sourceFile}: ${fieldName} превышает лимит 20 МБ`);
+  }
+
+  return {
+    file: normalizedPath,
+    fileName,
+    fileExtension: extension.toUpperCase(),
+    fileSize: stats.size
+  };
+}
+
 function normalizeBlockType(block) {
   return String(block?.type || block?._block || "").trim();
 }
@@ -319,6 +380,17 @@ function validateBlock(block, sourceFile, index) {
     return {
       type,
       label: typeof block.label === "string" ? block.label.trim() : ""
+    };
+  }
+
+  if (type === "download") {
+    const download = validateDownload(block.file, sourceFile, `${blockPrefix}.file`);
+
+    return {
+      type,
+      ...download,
+      title: requireString(block.title, sourceFile, `${blockPrefix}.title`),
+      description: typeof block.description === "string" ? block.description.trim() : ""
     };
   }
 

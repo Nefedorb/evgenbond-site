@@ -345,6 +345,37 @@ function renderDividerBlock(block) {
                 </div>`;
 }
 
+function formatDownloadSize(bytes) {
+  const units = [
+    { size: 1024 * 1024, label: "МБ" },
+    { size: 1024, label: "КБ" }
+  ];
+  const unit = units.find((candidate) => bytes >= candidate.size);
+
+  if (!unit) return `${bytes} Б`;
+
+  return `${new Intl.NumberFormat("ru-RU", {
+    maximumFractionDigits: bytes >= unit.size * 10 ? 0 : 1
+  }).format(bytes / unit.size)} ${unit.label}`;
+}
+
+function renderDownloadBlock(block) {
+  const description = block.description
+    ? `<p class="article-download-description">${escapeHtml(block.description)}</p>`
+    : "";
+
+  return `
+                <section class="article-block article-download-block" aria-label="Файл для скачивания">
+                    <div class="mono-text article-download-meta">[ ${escapeHtml(block.fileExtension)} // ${escapeHtml(formatDownloadSize(block.fileSize))} ]</div>
+                    <h2 class="article-download-title">${escapeHtml(block.title)}</h2>
+                    ${description}
+                    <a class="article-download-link" href="${escapeHtml(block.file)}" download="${escapeHtml(block.fileName)}">
+                        <span>Скачать файл</span>
+                        <span aria-hidden="true">[ → ]</span>
+                    </a>
+                </section>`;
+}
+
 function renderArticleBlocks(blocks) {
   return blocks.map((block) => {
     if (block.type === "text") {
@@ -359,6 +390,7 @@ ${renderMarkdownBlock(block.body)}
     if (block.type === "code") return renderCodeBlock(block.code, block.language, block.caption);
     if (block.type === "quote") return renderQuoteBlock(block);
     if (block.type === "divider") return renderDividerBlock(block);
+    if (block.type === "download") return renderDownloadBlock(block);
 
     return "";
   }).join("");

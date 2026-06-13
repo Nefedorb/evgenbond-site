@@ -1,16 +1,37 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
-import test, { before } from "node:test";
+import test, { after, before } from "node:test";
 import { buildSite } from "../scripts/blog/build-site.mjs";
 import { DIST, ROOT, SITE_URL } from "../scripts/blog/config.mjs";
 import { readPosts, slugifyTag, validatePost } from "../scripts/blog/content.mjs";
-import { getBlogPagePath, getTagPath, renderBlogIndex } from "../scripts/blog/render.mjs";
+import { getBlogPagePath, getTagPath, renderBlogIndex, renderPost } from "../scripts/blog/render.mjs";
 
 let publishedPosts;
+const DOWNLOAD_FIXTURE_DIRECTORY = path.join(ROOT, "assets", "downloads");
+const DOWNLOAD_FIXTURES = [
+  "manual.pdf",
+  "template.docx",
+  "table.xlsx",
+  "slides.pptx",
+  "notes.txt",
+  "archive.zip"
+];
 
 before(async () => {
+  await fs.mkdir(DOWNLOAD_FIXTURE_DIRECTORY, { recursive: true });
+  await Promise.all(DOWNLOAD_FIXTURES.map((fileName) =>
+    fs.writeFile(path.join(DOWNLOAD_FIXTURE_DIRECTORY, fileName), `fixture:${fileName}`, "utf8")
+  ));
   publishedPosts = await readPosts();
+  await buildSite();
+});
+
+after(async () => {
+  await Promise.all(DOWNLOAD_FIXTURES.map((fileName) =>
+    fs.rm(path.join(DOWNLOAD_FIXTURE_DIRECTORY, fileName), { force: true })
+  ));
+  await fs.rm(path.join(DOWNLOAD_FIXTURE_DIRECTORY, "too-large.pdf"), { force: true });
   await buildSite();
 });
 
@@ -104,18 +125,25 @@ function assertBreadcrumb(breadcrumb, expectedNames) {
   breadcrumb.itemListElement.forEach((item) => assert.ok(item.item.startsWith(SITE_URL)));
 }
 
-test("article validation accepts valid content and rejects invalid slugs", () => {
-  const post = validatePost({
+function createTestPostData(blocks) {
+  return {
     title: "Тестовая статья",
     slug: "test-post",
     date: "2026-06-12",
-    description: "Описание статьи",
+    description: "Описание тестовой статьи для проверки генератора.",
     coverImage: "/sharedlink.jpg",
     coverImageAlt: "Обложка",
     sharedImage: "/sharedlink.jpg",
     sharedImageAlt: "Изображение для публикации",
-    tags: ["Сайты", "Сайты"],
-    blocks: [{ type: "text", body: "Текст статьи." }]
+    tags: ["Сайты"],
+    blocks
+  };
+}
+
+test("article validation accepts valid content and rejects invalid slugs", () => {
+  const post = validatePost({
+    ...createTestPostData([{ type: "text", body: "Текст статьи." }]),
+    tags: ["Сайты", "Сайты"]
   }, "", "test.md");
 
   assert.equal(post.slug, "test-post");
@@ -130,6 +158,77 @@ test("article validation accepts valid content and rejects invalid slugs", () =>
     }, "Текст", "invalid.md"),
     /slug должен содержать только латиницу/
   );
+});
+
+test("download blocks accept common formats and render downloadable cards", () => {
+  const blocks = DOWNLOAD_FIXTURES.map((fileName) => ({
+    type: "download",
+    file: `/assets/downloads/${fileName}`,
+    title: `Скачать ${fileName}`,
+    description: "Полезный файл к статье."
+  }));
+  const post = validatePost(createTestPostData(blocks), "", "downloads.md");
+  const html = renderPost(post);
+
+  assert.equal(post.blocks.length, DOWNLOAD_FIXTURES.length);
+
+  for (const [index, fileName] of DOWNLOAD_FIXTURES.entries()) {
+    const block = post.blocks[index];
+    const extension = path.extname(fileName).slice(1).toUpperCase();
+
+    assert.equal(block.fileName, fileName);
+    assert.equal(block.fileExtension, extension);
+    assert.ok(block.fileSize > 0);
+    assert.match(html, new RegExp(`href="/assets/downloads/${fileName.replace(".", "\\.")}"`));
+    assert.match(html, new RegExp(`download="${fileName.replace(".", "\\.")}"`));
+    assert.match(html, new RegExp(`\\[ ${extension} //`));
+  }
+
+  assert.match(html, /Скачать файл/);
+  assert.match(html, /Полезный файл к статье\./);
+});
+
+test("download validation rejects unsafe, missing, and unsupported files", () => {
+  const validateDownload = (file) => validatePost(createTestPostData([{
+    type: "download",
+    file,
+    title: "Файл"
+  }]), "", "invalid-download.md");
+
+  assert.throws(() => validateDownload("https://example.com/file.pdf"), /локальным путём/);
+  assert.throws(() => validateDownload("/assets/downloads/../secret.pdf"), /локальным путём/);
+  assert.throws(() => validateDownload("/assets/downloads/missing.pdf"), /не найден/);
+
+  for (const extension of ["exe", "msi", "bat", "cmd", "ps1", "js", "vbs", "docm", "xlsm", "pptm"]) {
+    assert.throws(
+      () => validateDownload(`/assets/downloads/unsafe.${extension}`),
+      /запрещённый формат/
+    );
+  }
+});
+
+test("download validation rejects files larger than 20 MB", async () => {
+  const oversizedPath = path.join(DOWNLOAD_FIXTURE_DIRECTORY, "too-large.pdf");
+  const file = await fs.open(oversizedPath, "w");
+
+  try {
+    await file.truncate(20 * 1024 * 1024 + 1);
+  } finally {
+    await file.close();
+  }
+
+  try {
+    assert.throws(
+      () => validatePost(createTestPostData([{
+        type: "download",
+        file: "/assets/downloads/too-large.pdf",
+        title: "Слишком большой файл"
+      }]), "", "oversized-download.md"),
+      /превышает лимит 20 МБ/
+    );
+  } finally {
+    await fs.rm(oversizedPath, { force: true });
+  }
 });
 
 test("public URL helpers remain stable", () => {
@@ -277,5 +376,13 @@ test("required local CSS, fonts, images, and scripts are published", async () =>
 
   for (const resource of resources) {
     assert.equal(await pathExists(path.join(DIST, resource)), true, `Missing ${resource}`);
+  }
+
+  for (const fileName of DOWNLOAD_FIXTURES) {
+    assert.equal(
+      await pathExists(path.join(DIST, "assets", "downloads", fileName)),
+      true,
+      `Missing published download fixture ${fileName}`
+    );
   }
 });

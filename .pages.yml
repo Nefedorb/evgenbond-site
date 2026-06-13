@@ -1,8 +1,16 @@
 media:
-  input: assets/blog
-  output: /assets/blog
-  extensions: [jpg, jpeg, png, webp]
-  rename: safe
+  - name: images
+    label: Изображения блога
+    input: assets/blog
+    output: /assets/blog
+    extensions: [jpg, jpeg, png, webp]
+    rename: safe
+  - name: downloads
+    label: Файлы для скачивания
+    input: assets/downloads
+    output: /assets/downloads
+    extensions: [pdf, doc, docx, rtf, odt, xls, xlsx, ods, csv, ppt, pptx, odp, txt, md, html, htm, json, xml, zip]
+    rename: safe
 
 content:
   - name: blog
@@ -51,6 +59,8 @@ content:
         type: image
         required: true
         description: "Видимая картинка: используется в карточке блога и, если включено, в начале статьи."
+        options:
+          media: images
       - name: coverImageAlt
         label: Alt-текст обложки
         type: string
@@ -70,6 +80,8 @@ content:
         type: image
         required: true
         description: "Только для сниппетов соцсетей и мессенджеров. В самой статье не публикуется."
+        options:
+          media: images
       - name: sharedImageAlt
         label: Alt-текст shared link картинки
         type: string
@@ -103,6 +115,8 @@ content:
                 label: Изображение
                 type: image
                 required: true
+                options:
+                  media: images
               - name: alt
                 label: Alt-текст
                 type: string
@@ -194,3 +208,21 @@ content:
               - name: label
                 label: Подпись
                 type: string
+          - name: download
+            label: Скачать файл
+            fields:
+              - name: file
+                label: Файл
+                type: file
+                required: true
+                description: "Документы, таблицы, презентации, текстовые файлы или ZIP до 20 МБ."
+                options:
+                  media: downloads
+                  extensions: [pdf, doc, docx, rtf, odt, xls, xlsx, ods, csv, ppt, pptx, odp, txt, md, html, htm, json, xml, zip]
+              - name: title
+                label: Заголовок
+                type: string
+                required: true
+              - name: description
+                label: Описание
+                type: text
