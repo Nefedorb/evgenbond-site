@@ -412,11 +412,7 @@ function renderDownloadBlock(block) {
                     <a class="article-download-link" href="${escapeHtml(block.file)}" download="${escapeHtml(block.fileName)}">
                         <span>Скачать файл</span>
                         <span class="article-download-icon" aria-hidden="true">
-                            <svg viewBox="0 0 65 35" focusable="false">
-                                <path d="M35.871 25.5149L33.9051 23.5392L38.461 19.0042L19.5058 18.9861L19.5085 16.1995L38.4123 16.2176L33.933 11.7174L35.9072 9.75293L43.7708 17.6527L35.871 25.5149Z" fill="currentColor"></path>
-                                <path d="M54.3372 1.39355H63.3933V33.4385H54.3372" stroke="currentColor" stroke-width="2.78652"></path>
-                                <path d="M10.4495 1.39355H1.39328V33.4385H10.4495" stroke="currentColor" stroke-width="2.78652"></path>
-                            </svg>
+                            <img src="/arrow.svg" alt="" width="65" height="35">
                         </span>
                     </a>
                 </section>`;

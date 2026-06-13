@@ -199,10 +199,8 @@ test("download blocks accept common formats and render downloadable cards", () =
   assert.match(html, /Скачать файл/);
   assert.match(html, /Полезный файл к статье\./);
   assert.match(html, /class="article-download-icon"/);
-  assert.match(html, /<svg viewBox="0 0 65 35"/);
-  assert.match(html, /fill="currentColor"/);
-  assert.match(html, /stroke="currentColor"/);
-  assert.doesNotMatch(html, /article-download-icon[^]*?<img/);
+  assert.match(html, /<img src="\/arrow\.svg" alt="" width="65" height="35">/);
+  assert.doesNotMatch(html, /article-download-icon[^]*?<svg/);
 });
 
 test("download validation rejects unsafe, missing, and unsupported files", () => {

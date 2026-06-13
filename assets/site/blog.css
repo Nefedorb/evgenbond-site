@@ -520,14 +520,13 @@
     width: 32px;
     height: 18px;
     flex: 0 0 auto;
-    color: currentColor;
     transition: var(--transition-fast);
 }
-.article-download-icon svg {
+.article-download-icon img {
     display: block;
     width: 32px;
     height: auto;
-    transition: var(--transition-fast);
+    transition: filter var(--transition-fast);
 }
 .article-content .article-download-link:hover,
 .article-content .article-download-link:focus-visible {
@@ -539,6 +538,10 @@
 .article-content .article-download-link:hover .article-download-icon,
 .article-content .article-download-link:focus-visible .article-download-icon {
     transform: translateX(6px);
+}
+.article-content .article-download-link:hover .article-download-icon img,
+.article-content .article-download-link:focus-visible .article-download-icon img {
+    filter: invert(1);
 }
 .empty-blog {
     grid-column: 1 / -1;
