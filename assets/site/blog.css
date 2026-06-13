@@ -517,15 +517,22 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 42px;
-    height: 23px;
+    width: 28px;
+    height: 18px;
     flex: 0 0 auto;
+    color: currentColor;
     transition: var(--transition-fast);
 }
-.article-download-icon img {
+.article-download-icon svg {
     display: block;
-    width: 42px;
-    height: 23px;
+    width: 28px;
+    height: 18px;
+    overflow: visible;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: square;
+    stroke-linejoin: miter;
     transition: var(--transition-fast);
 }
 .article-content .article-download-link:hover,
@@ -538,10 +545,6 @@
 .article-content .article-download-link:hover .article-download-icon,
 .article-content .article-download-link:focus-visible .article-download-icon {
     transform: translateX(6px);
-}
-.article-content .article-download-link:hover .article-download-icon img,
-.article-content .article-download-link:focus-visible .article-download-icon img {
-    filter: invert(1);
 }
 .empty-blog {
     grid-column: 1 / -1;
