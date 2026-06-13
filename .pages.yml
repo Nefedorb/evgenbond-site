@@ -129,7 +129,9 @@ content:
       - name: blocks
         label: Блоки статьи
         type: block
-        list: true
+        list:
+          collapsible:
+            collapsed: false
         blockKey: type
         required: true
         blocks:
