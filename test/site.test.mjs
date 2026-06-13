@@ -198,6 +198,8 @@ test("download blocks accept common formats and render downloadable cards", () =
 
   assert.match(html, /Скачать файл/);
   assert.match(html, /Полезный файл к статье\./);
+  assert.match(html, /class="article-download-icon"/);
+  assert.match(html, /<img src="\/arrow\.svg" alt="">/);
 });
 
 test("download validation rejects unsafe, missing, and unsupported files", () => {
@@ -288,7 +290,7 @@ test("image appearance validation rejects unsafe and out-of-range values", () =>
   assert.throws(() => validateAppearance({ borderStyle: "groove" }), /неизвестный стиль рамки/);
 });
 
-test("image borders use the light gray default color", () => {
+test("images use the default border appearance", () => {
   const post = validatePost(createTestPostData([{
     type: "image",
     image: "/assets/blog/sharp-fixture.png",
@@ -297,8 +299,14 @@ test("image borders use the light gray default color", () => {
   const html = renderPost(post);
 
   assert.equal(post.blocks[0].borderColor, "#EAEAEA");
+  assert.equal(post.blocks[0].borderWidth, 3);
+  assert.equal(post.blocks[0].borderRadius, 10);
   assert.equal(post.coverAppearance.borderColor, "#EAEAEA");
+  assert.equal(post.coverAppearance.borderWidth, 3);
+  assert.equal(post.coverAppearance.borderRadius, 10);
+  assert.match(html, /--article-image-border-width:3px/);
   assert.match(html, /--article-image-border-color:#EAEAEA/);
+  assert.match(html, /--article-image-radius:10px/);
 });
 
 test("public URL helpers remain stable", () => {

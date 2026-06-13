@@ -411,7 +411,7 @@ function renderDownloadBlock(block) {
                     ${description}
                     <a class="article-download-link" href="${escapeHtml(block.file)}" download="${escapeHtml(block.fileName)}">
                         <span>Скачать файл</span>
-                        <span aria-hidden="true">[ → ]</span>
+                        <span class="article-download-icon" aria-hidden="true"><img src="/arrow.svg" alt=""></span>
                     </a>
                 </section>`;
 }

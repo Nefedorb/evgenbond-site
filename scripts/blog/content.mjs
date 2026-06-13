@@ -273,10 +273,10 @@ function normalizeBorderColor(value, sourceFile, fieldName) {
 
 function normalizeImageAppearance(data, sourceFile, fieldPrefix) {
   return {
-    borderWidth: normalizeNumber(data.borderWidth, 1, 1, 12, sourceFile, `${fieldPrefix}.borderWidth`),
+    borderWidth: normalizeNumber(data.borderWidth, 3, 1, 12, sourceFile, `${fieldPrefix}.borderWidth`),
     borderStyle: normalizeBorderStyle(data.borderStyle, sourceFile, `${fieldPrefix}.borderStyle`),
     borderColor: normalizeBorderColor(data.borderColor, sourceFile, `${fieldPrefix}.borderColor`),
-    borderRadius: normalizeNumber(data.borderRadius, 0, 0, 64, sourceFile, `${fieldPrefix}.borderRadius`)
+    borderRadius: normalizeNumber(data.borderRadius, 10, 0, 64, sourceFile, `${fieldPrefix}.borderRadius`)
   };
 }
 
