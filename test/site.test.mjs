@@ -288,6 +288,19 @@ test("image appearance validation rejects unsafe and out-of-range values", () =>
   assert.throws(() => validateAppearance({ borderStyle: "groove" }), /неизвестный стиль рамки/);
 });
 
+test("image borders use the light gray default color", () => {
+  const post = validatePost(createTestPostData([{
+    type: "image",
+    image: "/assets/blog/sharp-fixture.png",
+    alt: "Тест"
+  }]), "", "default-image-options.md");
+  const html = renderPost(post);
+
+  assert.equal(post.blocks[0].borderColor, "#EAEAEA");
+  assert.equal(post.coverAppearance.borderColor, "#EAEAEA");
+  assert.match(html, /--article-image-border-color:#EAEAEA/);
+});
+
 test("public URL helpers remain stable", () => {
   assert.equal(getBlogPagePath(1), "/blog/");
   assert.equal(getBlogPagePath(3), "/blog/page/3/");

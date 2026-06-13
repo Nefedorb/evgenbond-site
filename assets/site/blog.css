@@ -249,7 +249,7 @@
     height: auto;
     border-width: var(--article-image-border-width, 1px);
     border-style: var(--article-image-border-style, solid);
-    border-color: var(--article-image-border-color, var(--black));
+    border-color: var(--article-image-border-color, #EAEAEA);
     border-radius: var(--article-image-radius, 0);
     display: block;
     margin: 0 auto;
@@ -299,7 +299,7 @@
     height: auto;
     border-width: var(--article-image-border-width, 1px);
     border-style: var(--article-image-border-style, solid);
-    border-color: var(--article-image-border-color, var(--black));
+    border-color: var(--article-image-border-color, #EAEAEA);
     border-radius: var(--article-image-radius, 0);
     display: block;
 }

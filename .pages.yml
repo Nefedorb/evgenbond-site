@@ -99,7 +99,7 @@ content:
       - name: coverBorderColor
         label: Цвет рамки обложки
         type: string
-        default: "#0D0D0D"
+        default: "#EAEAEA"
         description: "HEX-цвет, например #C80000."
         pattern:
           regex: "^#[0-9A-Fa-f]{6}$"
@@ -191,7 +191,7 @@ content:
               - name: borderColor
                 label: Цвет рамки
                 type: string
-                default: "#0D0D0D"
+                default: "#EAEAEA"
                 description: "HEX-цвет, например #C80000."
                 pattern:
                   regex: "^#[0-9A-Fa-f]{6}$"

@@ -262,10 +262,10 @@ function normalizeBorderStyle(value, sourceFile, fieldName) {
 }
 
 function normalizeBorderColor(value, sourceFile, fieldName) {
-  const normalized = typeof value === "string" && value.trim() ? value.trim() : "#0D0D0D";
+  const normalized = typeof value === "string" && value.trim() ? value.trim() : "#EAEAEA";
 
   if (!/^#[0-9a-f]{6}$/i.test(normalized)) {
-    throw new Error(`${sourceFile}: ${fieldName} должен быть HEX-цветом вида #0D0D0D`);
+    throw new Error(`${sourceFile}: ${fieldName} должен быть HEX-цветом вида #EAEAEA`);
   }
 
   return normalized.toUpperCase();
