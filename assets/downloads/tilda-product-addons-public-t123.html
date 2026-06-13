@@ -1,0 +1,1512 @@
+<!--
+  ============================================================================
+  PUBLIC: ДОПОЛНИТЕЛЬНЫЕ ТОВАРЫ В POPUP TILDA STORE
+  ============================================================================
+
+  Что делает файл:
+  - читает из характеристики основного товара список UID дополнительных товаров;
+  - получает данные этих товаров из публичного каталога Tilda Store;
+  - показывает аксессуары с чекбоксами в popup товара;
+  - добавляет основной товар и выбранные дополнения в корзину одним действием.
+
+  Установка для popup:
+  1. Создайте страницу общего подвала и добавьте на нее HTML-блок T123.
+  2. Вставьте в него ВЕСЬ этот файл без внешних зависимостей.
+  3. Назначьте страницу подвалом в "Настройки сайта -> Шапка и подвал".
+  4. Убедитесь, что общий подвал не отключен на страницах каталога.
+  5. Опубликуйте подвал и заново опубликуйте страницы каталога.
+  6. Заполните catalogSources в конфиге ниже.
+  7. У основных товаров создайте характеристику "Допы".
+  8. В значение характеристики запишите UID через запятую, например:
+     111111111111, 222222222222, 333333333333
+
+  Важно:
+  - просто опубликованная страница с T123 не работает на других страницах,
+    пока она не назначена общим подвалом;
+  - popup поддерживается, отдельная страница товара для него не обязательна;
+  - если товары открываются страницами, назначьте T123-подвал товарным страницам;
+  - числа выше вымышлены и приведены только как пример формата;
+  - API-ключ Tilda не требуется;
+  - файл рассчитан на стандартные карточки и popup Tilda Store;
+  - рабочий код находится после конфигурации и обычно не редактируется.
+-->
+
+<script>
+/*
+  ============================================================================
+  PUBLIC CONFIG: НАСТРОЙКИ, КОТОРЫЕ МОЖНО МЕНЯТЬ
+  ============================================================================
+
+  Обязательная настройка только одна: catalogSources.
+  Остальные значения уже имеют безопасные значения по умолчанию.
+*/
+window.TILDA_PRODUCT_ADDONS_CONFIG = {
+  /* Версия нужна для диагностики и разделения кеша между обновлениями. */
+  version: "2.0.0-public",
+
+  /*
+    Необязательный ID блока корзины без префикса "rec".
+
+    Пример: если блок в HTML имеет id="rec1234567890", укажите "1234567890".
+    Оставьте пустую строку, чтобы скрипт автоматически нашел первую корзину T706.
+  */
+  cartRecId: "",
+
+  /* Тексты и внешний вид блока дополнений. */
+  currency: "₽",
+  title: "Дополнить комплект",
+  subtitle: "Отметьте аксессуары, которые нужно добавить вместе с товаром.",
+  themeColor: "#00819e",
+
+  /*
+    true  - не показывать товары с остатком 0;
+    false - показывать их как недоступные.
+  */
+  hideOutOfStock: true,
+
+  /* Открывать корзину после добавления основного товара и дополнений. */
+  openCartAfterAdd: true,
+
+  /*
+    Служебный параметр URL для диагностики:
+    https://ваш-сайт.ru/страница?tilda_product_addons_debug=1
+  */
+  debugParam: "tilda_product_addons_debug",
+
+  /*
+    Допустимые названия характеристики со списком UID.
+    Первое название "Допы" рекомендуется использовать в интерфейсе Tilda.
+  */
+  addonFieldNames: ["Допы", "addons", "tilda_product_addons"],
+
+  /*
+    ОБЯЗАТЕЛЬНО: перечислите каталоги, где могут находиться дополнения.
+
+    Для каждого каталога нужны:
+    - recId: ID блока магазина без "rec";
+    - storePartUid: UID раздела каталога Tilda.
+
+    Пример с вымышленными значениями:
+    catalogSources: [
+      { recId: "1234567890", storePartUid: "111111111111" },
+      { recId: "1234567890", storePartUid: "222222222222" }
+    ]
+
+    Если дополнения распределены по нескольким категориям, добавьте каждую
+    категорию один раз. Связи товаров по-прежнему задаются характеристикой "Допы".
+  */
+  catalogSources: [],
+
+  /*
+    Технические параметры загрузки. Обычно их менять не нужно.
+    Каталоги кешируются в sessionStorage браузера на 6 часов.
+  */
+  adminPageSize: 100,
+  adminMaxPages: 15,
+  addonRetryCount: 4,
+  addonRetryDelay: 250,
+  catalogCacheTtlMs: 21600000,
+
+  /*
+    Необязательный fallback связей.
+
+    Используйте его только если временно нельзя заполнить характеристику "Допы":
+    rules: {
+      "UID_ОСНОВНОГО_ТОВАРА": ["UID_ДОПА_1", "UID_ДОПА_2"]
+    }
+
+    Характеристика товара имеет приоритет над rules.
+  */
+  rules: {},
+
+  /*
+    Необязательный резервный кеш данных товаров.
+
+    В обычной установке оставьте пустым: товары загрузятся из catalogSources.
+    products нужен только как аварийный fallback, если товар нельзя получить
+    из каталога. Не добавляйте сюда вручную весь магазин.
+  */
+  products: {}
+};
+/* КОНЕЦ PUBLIC CONFIG. Ниже находятся стили и рабочая логика. */
+</script>
+
+<style>
+  /*
+    PUBLIC STYLES
+    Все классы имеют префикс tilda-product-, чтобы не пересекаться со стилями
+    сайта и с другими модификациями Tilda.
+  */
+  :root {
+    --tilda-product-addon-accent: #00819e;
+    --tilda-product-addon-ink: #202124;
+    --tilda-product-addon-muted: #687076;
+    --tilda-product-addon-border: #dce3e6;
+    --tilda-product-addon-bg: #ffffff;
+    --tilda-product-addon-soft: #f4f8f9;
+  }
+
+  .tilda-product-addons {
+    --tilda-product-addon-accent: var(--tilda-product-addon-theme, #00819e);
+    position: relative;
+    z-index: 3;
+    display: block;
+    clear: both;
+    width: 100%;
+    max-width: 100%;
+    margin: 22px 0;
+    padding: 18px;
+    border: 1px solid var(--tilda-product-addon-border);
+    border-radius: 8px;
+    background: var(--tilda-product-addon-bg);
+    box-sizing: border-box;
+    color: var(--tilda-product-addon-ink);
+    font-family: var(--t-text-font, "Raleway", Arial, sans-serif);
+  }
+
+  .t-store__prod-popup__info .tilda-product-addons {
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+    align-self: stretch;
+  }
+
+  .tilda-product-addons,
+  .tilda-product-addons * {
+    font-family: var(--t-text-font, "Raleway", Arial, sans-serif);
+    box-sizing: border-box;
+  }
+
+  .tilda-product-addons-hidden-tech-field {
+    display: none !important;
+  }
+
+  .tilda-product-addons__head {
+    margin-bottom: 14px;
+  }
+
+  .tilda-product-addons__title {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.25;
+    font-family: var(--t-heading-font, var(--t-text-font, "Raleway", Arial, sans-serif));
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .tilda-product-addons__subtitle {
+    margin: 6px 0 0;
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--tilda-product-addon-muted);
+  }
+
+  .tilda-product-addons__list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .tilda-product-addon-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 28px;
+    gap: 12px;
+    align-items: center;
+    min-height: 88px;
+    padding: 10px;
+    border: 1px solid var(--tilda-product-addon-border);
+    border-radius: 7px;
+    background: #fff;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: border-color .18s ease, background-color .18s ease, box-shadow .18s ease;
+  }
+
+  .tilda-product-addon-item:hover {
+    border-color: color-mix(in srgb, var(--tilda-product-addon-accent), #ffffff 40%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+  }
+
+  .tilda-product-addon-item.is-selected {
+    border-color: var(--tilda-product-addon-accent);
+    background: color-mix(in srgb, var(--tilda-product-addon-accent), #ffffff 93%);
+  }
+
+  .tilda-product-addon-item.is-disabled {
+    opacity: .55;
+    cursor: default;
+  }
+
+  .tilda-product-addon-item__image {
+    width: 72px;
+    height: 68px;
+    border-radius: 6px;
+    background: var(--tilda-product-addon-soft);
+    object-fit: cover;
+  }
+
+  .tilda-product-addon-item__body {
+    min-width: 0;
+  }
+
+  .tilda-product-addon-item__name {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.25;
+    font-family: var(--t-heading-font, var(--t-text-font, "Raleway", Arial, sans-serif));
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .tilda-product-addon-item__meta {
+    margin-top: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: baseline;
+    font-size: 13px;
+    line-height: 1.25;
+    color: var(--tilda-product-addon-muted);
+  }
+
+  .tilda-product-addon-item__price {
+    color: var(--tilda-product-addon-accent);
+    font-weight: 600;
+  }
+
+  .tilda-product-addon-item__oldprice {
+    color: #9aa1a6;
+    text-decoration: line-through;
+  }
+
+  .tilda-product-addon-item__sku {
+    color: var(--tilda-product-addon-muted);
+  }
+
+  .tilda-product-addon-item__check {
+    position: relative;
+    z-index: 2;
+    width: 22px;
+    height: 22px;
+    accent-color: var(--tilda-product-addon-accent);
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .tilda-product-addons__summary {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--tilda-product-addon-border);
+    font-size: 13px;
+    line-height: 1.35;
+    color: var(--tilda-product-addon-muted);
+  }
+
+  .tilda-product-addons__status {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--tilda-product-addon-muted);
+  }
+
+  .tilda-product-addons__status_error {
+    color: #b42318;
+  }
+
+  @media (max-width: 640px) {
+    .t-store__prod-popup__info .tilda-product-addons {
+      display: block !important;
+      position: relative !important;
+      left: auto !important;
+      right: auto !important;
+      top: auto !important;
+      bottom: auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      order: 30;
+    }
+
+    .tilda-product-addons {
+      margin: 16px 0 18px;
+      padding: 14px;
+      border-radius: 7px;
+    }
+
+    .tilda-product-addons__title {
+      font-size: 16px;
+    }
+
+    .tilda-product-addons__subtitle {
+      font-size: 12px;
+    }
+
+    .tilda-product-addon-item {
+      grid-template-columns: 56px minmax(0, 1fr) 28px;
+      min-height: 76px;
+      gap: 10px;
+      padding: 9px;
+    }
+
+    .tilda-product-addon-item__image {
+      width: 56px;
+      height: 56px;
+    }
+
+  }
+</style>
+
+<script>
+/*
+  ============================================================================
+  PUBLIC IMPLEMENTATION
+  ============================================================================
+
+  Код ниже:
+  - следит за открытием и перерисовкой popup Tilda Store;
+  - извлекает UID из характеристики "Допы";
+  - загружает и кеширует каталоги;
+  - отрисовывает строки дополнений;
+  - перехватывает покупку только когда отмечен хотя бы один дополнительный товар.
+
+  Для обычной установки редактировать этот раздел не требуется. При проблемах
+  откройте опубликованную страницу с ?tilda_product_addons_debug=1, затем popup
+  товара и выполните в консоли:
+
+  TILDA_PRODUCT_ADDONS_DIAG()
+*/
+(function () {
+  "use strict";
+
+  var DEFAULTS = {
+    version: "2.0.0-public",
+    storeRecId: "",
+    storePartUid: "",
+    cartRecId: "",
+    rootZone: "com",
+    currency: "₽",
+    title: "Дополнить комплект",
+    subtitle: "",
+    themeColor: "#00819e",
+    hideOutOfStock: true,
+    openCartAfterAdd: true,
+    debugParam: "tilda_product_addons_debug",
+    addonFieldNames: ["Допы", "addons", "tilda_product_addons"],
+    catalogSources: [],
+    adminPageSize: 100,
+    adminMaxPages: 15,
+    requestTimeout: 20000,
+    addonRetryCount: 4,
+    addonRetryDelay: 250,
+    showPublicMissingErrors: false,
+    catalogCacheTtlMs: 21600000,
+    catalogCachePrefix: "tilda_product_addons_catalog_v2",
+    rules: {},
+    products: {}
+  };
+
+  var cfg = normalizeConfig(merge({}, DEFAULTS, window.TILDA_PRODUCT_ADDONS_CONFIG || {}));
+  var EMPTY_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' rx='8' fill='%23eef3f5'/%3E%3Cpath d='M23 53h34L46 39l-8 10-5-6-10 10zM29 29a5 5 0 1 0 0 10 5 5 0 0 0 0-10z' fill='%23b9c8cf'/%3E%3C/svg%3E";
+  var productIndex = {};
+  var activePopup = null;
+  var scanTimer = null;
+  var batchStartedAt = 0;
+  var catalogsLoaded = false;
+  var catalogsLoading = false;
+  var catalogCallbacks = [];
+  var lastCatalogLoadError = "";
+  var lastCatalogProductCount = 0;
+  var lastCatalogProducts = [];
+
+  function normalizeConfig(config) {
+    config.catalogSources = normalizeCatalogSources(config);
+    config.addonFieldNames = normalizeFieldNames(config.addonFieldNames);
+    return config;
+  }
+
+  function normalizeCatalogSources(config) {
+    var out = [];
+    var seen = {};
+
+    function add(source) {
+      source = source || {};
+      var recId = text(source.recId || source.recid || source.recordId || source.storeRecId || "");
+      var storePartUid = text(source.storePartUid || source.storepartuid || source.partUid || source.partuid || "");
+      var key = recId + "|" + storePartUid;
+      if (!storePartUid || seen[key]) return;
+      seen[key] = true;
+      out.push({ recId: recId, storePartUid: storePartUid });
+    }
+
+    if (Array.isArray(config.catalogSources)) {
+      config.catalogSources.forEach(add);
+    }
+    if (!out.length && config.storePartUid) {
+      add({ recId: config.storeRecId, storePartUid: config.storePartUid });
+    }
+    return out;
+  }
+
+  function normalizeFieldNames(names) {
+    var list = Array.isArray(names) && names.length ? names : DEFAULTS.addonFieldNames;
+    var seen = {};
+    return list.map(text).filter(function (name) {
+      var key = normalizeFieldName(name);
+      if (!key || seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+  }
+
+  function isParamEnabled(name) {
+    var param = String(name || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp("(^|[?&])" + param + "(=1|=true|=y|&|$)", "i").test(window.location.search);
+  }
+
+  function debugLog() {
+    if (!isParamEnabled(cfg.debugParam)) return;
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift("[Tilda Product Addons]");
+    if (window.console && console.log) console.log.apply(console, args);
+  }
+
+  window.TILDA_PRODUCT_ADDONS_DIAG = function () {
+    hydrateFromConfig();
+    hydrateFromDom();
+    var popup = getVisibleProductPopup();
+    var product = popup ? getCurrentProduct(popup) : null;
+    var uid = product ? product.uid : "";
+    var addonInfo = popup && product ? getAddonInfo(popup, product) : { uids: [], source: "none" };
+    var rules = cfg.rules || {};
+    var data = {
+      config: cfg,
+      visiblePopupFound: !!popup,
+      currentPopupUid: uid,
+      addonUids: addonInfo.uids,
+      missingAddonUids: getMissingProductUids(addonInfo.uids),
+      addonSource: addonInfo.source,
+      hasRuleForCurrentUid: !!(uid && rules[uid] && rules[uid].length),
+      knownRuleUids: Object.keys(rules),
+      knownProductUids: Object.keys(productIndex),
+      catalogSources: cfg.catalogSources,
+      catalogsLoaded: catalogsLoaded,
+      catalogsLoading: catalogsLoading,
+      lastCatalogLoadError: lastCatalogLoadError,
+      lastCatalogProductCount: lastCatalogProductCount,
+      cartFound: !!getCartNode()
+    };
+    console.log("[Tilda Product Addons diagnostic]", data);
+    return data;
+  };
+
+  function ready(fn) {
+    if (document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
+  }
+
+  function merge(target) {
+    var i;
+    for (i = 1; i < arguments.length; i++) {
+      var src = arguments[i] || {};
+      Object.keys(src).forEach(function (key) {
+        if (src[key] && typeof src[key] === "object" && !Array.isArray(src[key])) {
+          target[key] = merge(target[key] || {}, src[key]);
+        } else {
+          target[key] = src[key];
+        }
+      });
+    }
+    return target;
+  }
+
+  function qsa(root, selector) {
+    return Array.prototype.slice.call((root || document).querySelectorAll(selector));
+  }
+
+  function closest(el, selector) {
+    if (el && el.nodeType !== 1) el = el.parentElement || el.parentNode;
+    while (el && el.nodeType === 1) {
+      if (el.matches && el.matches(selector)) return el;
+      el = el.parentElement;
+    }
+    return null;
+  }
+
+  function text(value) {
+    return value == null ? "" : String(value);
+  }
+
+  function cleanPrice(value) {
+    if (value == null || value === "") return 0;
+    var str = String(value).replace(/\s/g, "").replace(",", ".").replace(/[^\d.]/g, "");
+    var num = parseFloat(str);
+    return isNaN(num) ? 0 : num;
+  }
+
+  function formatPrice(value) {
+    var num = cleanPrice(value);
+    var rounded = Math.round(num * 100) / 100;
+    var parts = String(rounded).split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    return parts.join(",") + " " + cfg.currency;
+  }
+
+  function getAllRecords() {
+    return document.getElementById("allrecords");
+  }
+
+  function getRootZone() {
+    var allrecords = getAllRecords();
+    return (allrecords && allrecords.getAttribute("data-tilda-root-zone")) || cfg.rootZone || "com";
+  }
+
+  function getStoreRoot() {
+    return document;
+  }
+
+  function getCartNode() {
+    if (cfg.cartRecId) {
+      var rec = document.getElementById("rec" + cfg.cartRecId);
+      if (rec) return rec.querySelector(".t706");
+    }
+    return document.querySelector(".t706");
+  }
+
+  function getEndpoint() {
+    if (typeof window.t_store__setupEndpoint === "function" && !window.t_store_endpoint) {
+      try { window.t_store__setupEndpoint(); } catch (e) {}
+    }
+    return window.t_store_endpoint || ("store.tildaapi." + getRootZone());
+  }
+
+  function serialize(obj) {
+    return Object.keys(obj).filter(function (key) {
+      return obj[key] !== "" && obj[key] != null;
+    }).map(function (key) {
+      return encodeURIComponent(key) + "=" + encodeURIComponent(obj[key]);
+    }).join("&");
+  }
+
+  function parseMaybeJson(value, fallback) {
+    if (Array.isArray(value)) return value;
+    if (typeof value !== "string") return fallback;
+    try { return JSON.parse(value); } catch (e) { return fallback; }
+  }
+
+  function getFirstEdition(raw) {
+    var editions = parseMaybeJson(raw && raw.editions, raw && raw.editions);
+    if (!Array.isArray(editions) || !editions.length) return {};
+    var available = editions.filter(function (item) {
+      return item && (item.quantity === "" || item.quantity == null || parseInt(item.quantity, 10) > 0);
+    });
+    return available[0] || editions[0] || {};
+  }
+
+  function getFirstImage(raw) {
+    if (!raw) return "";
+    if (raw.img) return raw.img;
+    var gallery = parseMaybeJson(raw.gallery, []);
+    if (gallery && gallery[0] && gallery[0].img) return gallery[0].img;
+    return "";
+  }
+
+  function normalizeProduct(raw) {
+    raw = raw || {};
+    var edition = getFirstEdition(raw);
+    var uid = text(raw.uid || raw.lid || raw.id || raw.productuid);
+    var price = raw.price || raw.price_min || edition.price || raw.amount || 0;
+    var inv = raw.inv;
+    var characteristics = parseMaybeJson(raw.characteristics, raw.characteristics || []);
+    if (inv == null || inv === "") inv = raw.quantity;
+    if (inv == null || inv === "") inv = edition.quantity;
+
+    return {
+      uid: uid,
+      name: text(raw.name || raw.title || raw.productname || uid),
+      price: cleanPrice(price),
+      oldPrice: raw.oldPrice || raw.priceold || raw.price_old || "",
+      sku: text(raw.sku || edition.sku || ""),
+      img: getFirstImage(raw),
+      inv: inv == null ? "" : inv,
+      characteristics: Array.isArray(characteristics) ? characteristics : [],
+      raw: raw
+    };
+  }
+
+  function indexProduct(raw) {
+    var product = normalizeProduct(raw);
+    var existing;
+    if (!product.uid) return null;
+    existing = productIndex[product.uid];
+    if (existing) {
+      product = merge({}, existing, product);
+      product.raw = merge({}, existing.raw || {}, product.raw || {});
+      if ((!product.characteristics || !product.characteristics.length) && existing.characteristics) {
+        product.characteristics = existing.characteristics;
+      }
+    }
+    productIndex[product.uid] = product;
+    return product;
+  }
+
+  function hydrateFromConfig() {
+    Object.keys(cfg.products || {}).forEach(function (uid) {
+      indexProduct(merge({ uid: uid }, cfg.products[uid]));
+    });
+  }
+
+  function collectFromDomProduct(node) {
+    if (!node) return null;
+    var product = null;
+    if (typeof window.t_store__collectProductDataByElement === "function") {
+      try { product = window.t_store__collectProductDataByElement(node); } catch (e) {}
+    }
+    if (!product) {
+      var nameNode = node.querySelector(".js-product-name, .t-store__card__title, .t-store__prod-popup__name");
+      var priceNode = node.querySelector(".js-product-price, .js-store-prod-price-val, .t-store__card__price-value");
+      var imgNode = node.querySelector(".js-product-img, .t-store__card__img, img");
+      product = {
+        uid: node.getAttribute("data-product-uid") || node.getAttribute("data-product-lid"),
+        name: nameNode ? nameNode.textContent.trim() : "",
+        price: priceNode ? (priceNode.getAttribute("data-product-price-def") || priceNode.textContent) : "",
+        img: imgNode ? (imgNode.getAttribute("data-original") || imgNode.getAttribute("src")) : "",
+        inv: node.getAttribute("data-product-inv") || "",
+        characteristics: []
+      };
+    }
+    return indexProduct(product);
+  }
+
+  function hydrateFromDom() {
+    qsa(document, ".js-product[data-product-uid], .t-store__product-popup[data-product-uid], .t-store__product-snippet[data-product-uid]").forEach(collectFromDomProduct);
+  }
+
+  function isOutOfStock(product) {
+    if (!product) return false;
+    if (product.inv === "" || product.inv == null) return false;
+    var inv = parseInt(product.inv, 10);
+    return !isNaN(inv) && inv <= 0;
+  }
+
+  function getProductByUid(uid) {
+    return productIndex[text(uid)] || null;
+  }
+
+  function getCatalogCacheStorage() {
+    if (!cfg.catalogCacheTtlMs || !window.sessionStorage) return null;
+    try {
+      var key = "__tilda_product_addons_cache_test__";
+      window.sessionStorage.setItem(key, "1");
+      window.sessionStorage.removeItem(key);
+      return window.sessionStorage;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function getCatalogCacheKey(source) {
+    return [
+      cfg.catalogCachePrefix || "tilda_product_addons_catalog",
+      cfg.version || "v",
+      text(source && source.recId),
+      text(source && source.storePartUid)
+    ].join(":");
+  }
+
+  function readCatalogCache(source) {
+    var storage = getCatalogCacheStorage();
+    var payload;
+    var products;
+    if (!storage || !source || !source.storePartUid) return null;
+    try {
+      payload = JSON.parse(storage.getItem(getCatalogCacheKey(source)) || "null");
+    } catch (e) {
+      storage.removeItem(getCatalogCacheKey(source));
+      return null;
+    }
+    if (!payload || !Array.isArray(payload.products) || !payload.savedAt) return null;
+    if (Date.now() - payload.savedAt > cfg.catalogCacheTtlMs) {
+      storage.removeItem(getCatalogCacheKey(source));
+      return null;
+    }
+    products = payload.products.map(indexProduct).filter(Boolean);
+    debugLog("Каталог загружен из sessionStorage", source.storePartUid, products.length);
+    return products;
+  }
+
+  function writeCatalogCache(source, products) {
+    var storage = getCatalogCacheStorage();
+    var payload;
+    if (!storage || !source || !source.storePartUid || !products || !products.length) return;
+    payload = {
+      savedAt: Date.now(),
+      products: products.map(exportProduct)
+    };
+    try {
+      storage.setItem(getCatalogCacheKey(source), JSON.stringify(payload));
+    } catch (e) {
+      debugLog("Не удалось записать каталог в sessionStorage", source.storePartUid, e);
+    }
+  }
+
+  function fetchCatalogProducts(done) {
+    var sources = cfg.catalogSources || [];
+    var result = [];
+    var pending = sources.length;
+    var hadError = false;
+    var errors = [];
+    if (!pending) return done(result, true, "");
+
+    sources.forEach(function (source) {
+      fetchCatalogSource(source, function (products, ok, error) {
+        if (!ok) {
+          hadError = true;
+          if (error) errors.push(error);
+        }
+        result = result.concat(products || []);
+        pending -= 1;
+        if (!pending) done(uniqueProducts(result), !hadError, errors.join("; "));
+      });
+    });
+  }
+
+  function fetchCatalogSource(source, done) {
+    var result = [];
+    var page = 0;
+    var finished = false;
+    var cached;
+    source = source || {};
+    if (!source.storePartUid) return done(result, true, "");
+    cached = readCatalogCache(source);
+    if (cached) return done(cached, true, "");
+
+    function finish(ok, error) {
+      if (finished) return;
+      finished = true;
+      if (ok !== false) writeCatalogCache(source, result);
+      done(result, ok !== false, error || "");
+    }
+
+    function load(slice) {
+      page += 1;
+      var params = {
+        storepartuid: source.storePartUid,
+        recid: source.recId,
+        c: Date.now(),
+        getparts: true,
+        getoptions: true,
+        flag_root: "withroot",
+        size: cfg.adminPageSize || 100
+      };
+      if (slice) params.slice = slice;
+
+      var xhr = new XMLHttpRequest();
+      var url = "https://" + getEndpoint() + "/api/getproductslist/?" + serialize(params);
+      xhr.onload = function () {
+        var response;
+        if (xhr.readyState !== xhr.DONE || xhr.status !== 200) {
+          return finish(false, "catalog " + source.storePartUid + " HTTP " + xhr.status);
+        }
+        try { response = JSON.parse(xhr.responseText); } catch (e) {
+          return finish(false, "catalog " + source.storePartUid + " JSON parse error");
+        }
+        (response.products || []).forEach(function (item) {
+          var product = indexProduct(item);
+          if (product) result.push(product);
+        });
+        if (response.nextslice && page < (cfg.adminMaxPages || 15)) load(response.nextslice);
+        else finish(true, "");
+      };
+      xhr.onerror = function () { finish(false, "catalog " + source.storePartUid + " network error"); };
+      xhr.ontimeout = function () { finish(false, "catalog " + source.storePartUid + " timeout"); };
+      xhr.open("GET", url, true);
+      xhr.timeout = cfg.requestTimeout;
+      xhr.send();
+    }
+
+    load("");
+  }
+
+  function ensureCatalogsLoaded(done) {
+    done = typeof done === "function" ? done : function () {};
+    if (catalogsLoaded) return done(lastCatalogProducts);
+    catalogCallbacks.push(done);
+    if (catalogsLoading) return;
+    catalogsLoading = true;
+    fetchCatalogProducts(function (products, ok, error) {
+      var callbacks;
+      catalogsLoaded = ok !== false;
+      catalogsLoading = false;
+      lastCatalogProducts = products || [];
+      lastCatalogProductCount = (products || []).length;
+      lastCatalogLoadError = ok === false ? (error || "catalog load failed") : "";
+      callbacks = catalogCallbacks.slice();
+      catalogCallbacks = [];
+      callbacks.forEach(function (callback) { callback(lastCatalogProducts); });
+    });
+  }
+
+  function unique(items) {
+    var seen = {};
+    var out = [];
+    (items || []).forEach(function (item) {
+      item = text(item);
+      if (!item || seen[item]) return;
+      seen[item] = true;
+      out.push(item);
+    });
+    return out;
+  }
+
+  function uniqueProducts(items) {
+    var seen = {};
+    return (items || []).filter(function (item) {
+      if (!item || !item.uid || seen[item.uid]) return false;
+      seen[item.uid] = true;
+      return true;
+    });
+  }
+
+  function getVisibleProductPopup() {
+    var selector = ".t-store__product-popup, .t-store__product-snippet";
+    var popups = qsa(document, selector);
+    var i;
+    for (i = 0; i < popups.length; i++) {
+      var popup = popups[i];
+      var shell = closest(popup, ".t-popup") || popup;
+      var style = window.getComputedStyle(shell);
+      var visible = style.display !== "none" && style.visibility !== "hidden" && shell.getClientRects().length > 0;
+      if (visible) return popup;
+    }
+    return null;
+  }
+
+  function getPopupProductNode(popup) {
+    return popup && (popup.classList.contains("js-product") ? popup : popup.querySelector(".js-product"));
+  }
+
+  function getCurrentProduct(popup) {
+    var productNode = getPopupProductNode(popup);
+    if (!productNode) return null;
+    return collectFromDomProduct(productNode);
+  }
+
+  function getCurrentUid(popup) {
+    var product = getCurrentProduct(popup);
+    return product ? product.uid : "";
+  }
+
+  function scheduleScan(delay) {
+    clearTimeout(scanTimer);
+    scanTimer = setTimeout(scanPopup, typeof delay === "number" ? delay : 140);
+  }
+
+  function scheduleScanBurst(delay) {
+    scheduleScan(typeof delay === "number" ? delay : 140);
+    setTimeout(scanPopup, 420);
+    setTimeout(scanPopup, 900);
+    setTimeout(scanPopup, 1800);
+    setTimeout(scanPopup, 3200);
+  }
+
+  function scanPopup() {
+    hydrateFromDom();
+    var popup = getVisibleProductPopup();
+    var product;
+    if (!popup) {
+      activePopup = null;
+      debugLog("Видимый попап товара не найден");
+      return;
+    }
+    product = getCurrentProduct(popup);
+    if (!product || !product.uid) {
+      debugLog("Попап найден, но UID товара не определился", popup);
+      return;
+    }
+    activePopup = popup;
+    injectAddons(popup, product);
+    bindBuyButton(popup);
+  }
+
+  function injectAddons(popup, product) {
+    var productFromIndex = getProductByUid(product.uid);
+    var addonInfo = getAddonInfo(popup, productFromIndex || product);
+    var addonUids = unique(addonInfo.uids || []);
+    var addonKey = addonUids.join("|");
+    var oldBox = popup.querySelector(".tilda-product-addons");
+    var sameAddons = oldBox && oldBox.dataset.mainUid === product.uid && oldBox.dataset.addonUids === addonKey;
+
+    hideAddonFieldsInPopup(popup);
+
+    if (!addonUids.length && !catalogsLoaded && cfg.catalogSources.length) {
+      debugLog("Допы не найдены до загрузки catalogSources, пробуем после загрузки каталога", product.uid);
+      ensureCatalogsLoaded(function () { scheduleScan(0); });
+      return;
+    }
+
+    if (!addonUids.length) {
+      if (oldBox) oldBox.parentNode.removeChild(oldBox);
+      debugLog("Для товара нет допов", product.uid, "source", addonInfo.source);
+      return;
+    }
+
+    if (
+      sameAddons &&
+      oldBox.dataset.rendered === "1" &&
+      !oldBox.dataset.missingUids
+    ) {
+      placeAddonBox(popup, oldBox);
+      bindAddonEvents(oldBox);
+      return;
+    }
+
+    if (sameAddons && oldBox.dataset.rendered === "loading" && catalogsLoading) {
+      placeAddonBox(popup, oldBox);
+      return;
+    }
+
+    var box = oldBox || document.createElement("section");
+    box.className = "tilda-product-addons";
+    box.dataset.mainUid = product.uid;
+    box.dataset.addonUids = addonKey;
+    box.dataset.addonSource = addonInfo.source;
+    if (!sameAddons) {
+      box.dataset.retryCount = "0";
+      box.dataset.missingUids = "";
+      box.dataset.rendered = "0";
+    }
+    box.style.setProperty("--tilda-product-addon-theme", cfg.themeColor);
+    if (!sameAddons || box.dataset.rendered !== "partial") {
+      renderAddonLoading(box);
+    }
+
+    placeAddonBox(popup, box);
+    debugLog("Блок допов вставлен", product.uid, addonInfo.source, addonUids);
+
+    if (!getMissingProductUids(addonUids).length) {
+      renderAddonRows(box, addonUids);
+      ensureCatalogsLoaded(function () {});
+      return;
+    }
+
+    ensureCatalogsLoaded(function () {
+      if (!document.body.contains(box) || box.dataset.mainUid !== product.uid) return;
+      renderAddonRows(box, addonUids);
+    });
+  }
+
+  function getAddonInfo(popup, product) {
+    var fromProduct = extractAddonUidsFromProduct(product);
+    var fromDom;
+    if (fromProduct.uids.length) return fromProduct;
+
+    fromDom = extractAddonUidsFromPopup(popup);
+    if (fromDom.uids.length) return fromDom;
+
+    var fallback = unique((cfg.rules || {})[product.uid] || []);
+    return {
+      uids: fallback,
+      source: fallback.length ? "rules" : "none"
+    };
+  }
+
+  function extractAddonUidsFromProduct(product) {
+    var raw = product && (product.raw || product);
+    var value = "";
+    if (!product) return { uids: [], source: "none" };
+
+    value = extractAddonValueFromCharacteristics(product.characteristics);
+    if (!value && raw) value = extractAddonValueFromCharacteristics(raw.characteristics);
+    if (!value && raw) value = extractAddonValueFromText([raw.text, raw.descr, raw.description].join("\n"));
+
+    return {
+      uids: parseUidList(value),
+      source: value ? "characteristics" : "none"
+    };
+  }
+
+  function extractAddonUidsFromPopup(popup) {
+    var value = "";
+    var nodes = qsa(popup, [
+      ".t-store__prod-popup__charcs",
+      ".t-store__prod-popup__characteristics",
+      ".js-store-prod-charcs",
+      ".t-product__option",
+      ".t-store__prod-popup__text"
+    ].join(","));
+    var i;
+    for (i = 0; i < nodes.length; i++) {
+      value = extractAddonValueFromText(nodes[i].textContent || "");
+      if (value) break;
+    }
+    if (!value) value = extractAddonValueFromText(popup.textContent || "");
+    return {
+      uids: parseUidList(value),
+      source: value ? "popup_dom" : "none"
+    };
+  }
+
+  function extractAddonValueFromCharacteristics(characteristics) {
+    var list = parseMaybeJson(characteristics, characteristics);
+    var i;
+    var item;
+    var name;
+    var value;
+
+    if (typeof list === "string") return extractAddonValueFromText(list);
+    if (list && typeof list === "object" && !Array.isArray(list)) {
+      list = Object.keys(list).map(function (key) {
+        return { name: key, value: list[key] };
+      });
+    }
+    if (!Array.isArray(list)) return "";
+
+    for (i = 0; i < list.length; i++) {
+      item = list[i];
+      if (Array.isArray(item)) {
+        name = item[0];
+        value = item[1];
+      } else if (item && typeof item === "object") {
+        name = item.title || item.name || item.key || item.label || item.characteristic || item.char || "";
+        value = item.value || item.val || item.values || item.text || item.descr || item.description || "";
+      } else {
+        name = "";
+        value = item;
+      }
+
+      if (isAddonFieldName(name)) return text(value);
+      value = extractAddonValueFromText(text(name) + ": " + text(value));
+      if (value) return value;
+    }
+    return "";
+  }
+
+  function extractAddonValueFromText(value) {
+    var source = text(value);
+    var names = (cfg.addonFieldNames || DEFAULTS.addonFieldNames).map(escapeRegExp).join("|");
+    var marker;
+    var line;
+    var match;
+    if (!source || !names) return "";
+
+    marker = new RegExp("(?:\\[|<!--\\s*)\\s*(?:" + names + ")\\s*[:=]\\s*([^\\]\\n<]+)", "i");
+    line = new RegExp("(?:^|[\\n\\r;])\\s*(?:" + names + ")\\s*[:=\\-]?\\s*([^\\n\\r<]+)", "i");
+    match = source.match(marker) || source.match(line);
+    return match ? match[1] : "";
+  }
+
+  function parseUidList(value) {
+    return unique(text(value).match(/\d{6,}/g) || []);
+  }
+
+  function normalizeFieldName(value) {
+    return text(value).toLowerCase().replace(/\s+/g, "");
+  }
+
+  function isAddonFieldName(value) {
+    var key = normalizeFieldName(value);
+    return (cfg.addonFieldNames || []).some(function (name) {
+      return normalizeFieldName(name) === key;
+    });
+  }
+
+  function escapeRegExp(value) {
+    return text(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function hideAddonFieldsInPopup(popup) {
+    var selector = [
+      ".t-store__prod-popup__charcs-item",
+      ".t-store__prod-popup__characteristics-item",
+      ".t-product__option",
+      "tr",
+      "li",
+      "p",
+      "div"
+    ].join(",");
+    qsa(popup, selector).forEach(function (node) {
+      var value = node.textContent || "";
+      if (value.length > 320) return;
+      if (
+        node.tagName === "DIV" &&
+        node.children.length > 2 &&
+        !node.classList.contains("t-store__prod-popup__charcs-item") &&
+        !node.classList.contains("t-store__prod-popup__characteristics-item") &&
+        !node.classList.contains("t-product__option")
+      ) {
+        return;
+      }
+      if (parseUidList(extractAddonValueFromText(value)).length) {
+        node.classList.add("tilda-product-addons-hidden-tech-field");
+      }
+    });
+  }
+
+  function placeAddonBox(popup, box) {
+    var info = popup.querySelector(".t-store__prod-popup__info") || popup;
+    var controlsWrap = info.querySelector(".js-product-controls-wrapper");
+    var priceWrap = info.querySelector(".js-store-price-wrapper, .t-store__prod-popup__price-wrapper");
+    var textBlock = info.querySelector(".t-store__prod-popup__text");
+    var buttonWrap = info.querySelector(".t-store__prod-popup__btn-wrapper:not(.t-store__prod-popup__btn-wrapper-fixed), .js-store-buttons-wrapper");
+    var anchor = hasVisibleChildren(controlsWrap) ? controlsWrap : priceWrap;
+
+    if (anchor && anchor.parentNode) insertAfter(box, anchor);
+    else if (textBlock && textBlock.parentNode) insertBefore(box, textBlock);
+    else if (buttonWrap && buttonWrap.parentNode) insertBefore(box, buttonWrap);
+    else if (box.parentNode !== info) info.appendChild(box);
+  }
+
+  function insertAfter(node, referenceNode) {
+    if (!referenceNode || !referenceNode.parentNode) return;
+    if (node.parentNode === referenceNode.parentNode && node.previousElementSibling === referenceNode) return;
+    referenceNode.parentNode.insertBefore(node, referenceNode.nextSibling);
+  }
+
+  function insertBefore(node, referenceNode) {
+    if (!referenceNode || !referenceNode.parentNode) return;
+    if (node.parentNode === referenceNode.parentNode && node.nextElementSibling === referenceNode) return;
+    referenceNode.parentNode.insertBefore(node, referenceNode);
+  }
+
+  function hasVisibleChildren(node) {
+    if (!node || !node.parentNode || !node.children || !node.children.length) return false;
+    if (window.getComputedStyle(node).display === "none") return false;
+    return node.getClientRects().length > 0 && (node.offsetWidth > 0 || node.offsetHeight > 0);
+  }
+
+  function renderAddonRows(box, addonUids) {
+    var rows = [];
+    hydrateFromConfig();
+    var missing = getMissingProductUids(addonUids);
+    var selectedMap = getSelectedAddonUidMap(box);
+
+    if (missing.length) {
+      var retryCount = parseInt(box.dataset.retryCount || "0", 10);
+      if (isNaN(retryCount)) retryCount = 0;
+      box.dataset.missingUids = missing.join(",");
+
+      if (retryCount < (cfg.addonRetryCount || 10)) {
+        box.dataset.retryCount = String(retryCount + 1);
+        renderAddonLoading(box);
+        setTimeout(function () {
+          if (!document.body.contains(box)) return;
+          hydrateFromConfig();
+          hydrateFromDom();
+          ensureCatalogsLoaded(function () {
+            if (!document.body.contains(box)) return;
+            renderAddonRows(box, addonUids);
+          });
+        }, cfg.addonRetryDelay || 500);
+        return;
+      }
+
+      debugLog("Не найдены данные для UID допов после ожидания", missing, "catalogSources", cfg.catalogSources);
+    }
+
+    addonUids.forEach(function (uid) {
+      var product = getProductByUid(uid);
+      if (!product) return;
+      if (cfg.hideOutOfStock && isOutOfStock(product)) return;
+      rows.push(renderAddonRow(product, !!selectedMap[uid]));
+    });
+
+    if (!rows.length) {
+      debugLog("Не удалось отрисовать строки допов", addonUids, productIndex);
+      box.dataset.rendered = "error";
+      if (missing.length && shouldShowMissingErrors()) {
+        box.innerHTML = [
+          '<div class="tilda-product-addons__status tilda-product-addons__status_error">',
+          'Не найдены данные допов: ' + escapeHtml(missing.join(", ")) + '. ',
+          'Добавьте каталог с этими товарами в catalogSources или заполните products в конфиге.',
+          '</div>'
+        ].join("");
+      } else if (box.parentNode) {
+        box.parentNode.removeChild(box);
+      }
+      return;
+    }
+
+    box.innerHTML = [
+      '<div class="tilda-product-addons__head">',
+      '  <h3 class="tilda-product-addons__title">' + escapeHtml(cfg.title) + '</h3>',
+      cfg.subtitle ? '  <p class="tilda-product-addons__subtitle">' + escapeHtml(cfg.subtitle) + '</p>' : "",
+      '</div>',
+      '<div class="tilda-product-addons__list">' + rows.join("") + '</div>',
+      '<div class="tilda-product-addons__summary" aria-live="polite">Допы не выбраны.</div>'
+    ].join("");
+
+    box.dataset.rendered = missing.length ? "partial" : "1";
+    box.dataset.missingUids = missing.length ? missing.join(",") : "";
+    if (!missing.length) box.dataset.retryCount = "0";
+    bindAddonEvents(box);
+    updateAddonSummary(box);
+  }
+
+  function renderAddonLoading(box) {
+    box.dataset.rendered = "loading";
+    box.innerHTML = [
+      '<div class="tilda-product-addons__head">',
+      '  <h3 class="tilda-product-addons__title">' + escapeHtml(cfg.title) + '</h3>',
+      cfg.subtitle ? '  <p class="tilda-product-addons__subtitle">' + escapeHtml(cfg.subtitle) + '</p>' : "",
+      '</div>',
+      '<div class="tilda-product-addons__status">Загружаем допы...</div>'
+    ].join("");
+  }
+
+  function shouldShowMissingErrors() {
+    return cfg.showPublicMissingErrors || isParamEnabled(cfg.debugParam);
+  }
+
+  function getMissingProductUids(uids) {
+    return unique(uids || []).filter(function (uid) {
+      return !getProductByUid(uid);
+    });
+  }
+
+  function bindAddonEvents(box) {
+    qsa(box, ".tilda-product-addon-item__check").forEach(function (input) {
+      if (input.dataset.tildaProductAddonBound === "1") return;
+      input.dataset.tildaProductAddonBound = "1";
+      input.addEventListener("change", function () {
+        var item = closest(input, ".tilda-product-addon-item");
+        if (item) item.classList.toggle("is-selected", input.checked);
+        updateAddonSummary(box);
+      });
+    });
+  }
+
+  function renderAddonRow(product, selected) {
+    var disabled = isOutOfStock(product);
+    var image = product.img ? escapeAttr(product.img) : EMPTY_IMG;
+    var oldPrice = product.oldPrice ? '<span class="tilda-product-addon-item__oldprice">' + escapeHtml(formatPrice(product.oldPrice)) + '</span>' : "";
+    var sku = product.sku ? '<span class="tilda-product-addon-item__sku">SKU: ' + escapeHtml(product.sku) + '</span>' : "";
+    var disabledText = disabled ? '<span class="tilda-product-addon-item__sku">Нет в наличии</span>' : "";
+
+    return [
+      '<label class="tilda-product-addon-item' + (disabled ? " is-disabled" : "") + (selected ? " is-selected" : "") + '" data-addon-uid="' + escapeAttr(product.uid) + '">',
+      '  <img class="tilda-product-addon-item__image" src="' + image + '" alt="">',
+      '  <span class="tilda-product-addon-item__body">',
+      '    <span class="tilda-product-addon-item__name">' + escapeHtml(product.name) + '</span>',
+      '    <span class="tilda-product-addon-item__meta">',
+      '      ' + oldPrice,
+      '      <span class="tilda-product-addon-item__price">' + escapeHtml(formatPrice(product.price)) + '</span>',
+      '      ' + sku,
+      '      ' + disabledText,
+      '    </span>',
+      '  </span>',
+      '  <input class="tilda-product-addon-item__check" type="checkbox" ' + (selected ? "checked " : "") + (disabled ? "disabled" : "") + '>',
+      '</label>'
+    ].join("");
+  }
+
+  function getSelectedAddonUidMap(box) {
+    var map = {};
+    qsa(box, ".tilda-product-addon-item__check:checked").forEach(function (input) {
+      var item = closest(input, ".tilda-product-addon-item");
+      var uid = item ? item.getAttribute("data-addon-uid") : "";
+      if (uid) map[uid] = true;
+    });
+    return map;
+  }
+
+  function updateAddonSummary(box) {
+    var selected = getSelectedAddonProducts(box);
+    var sum = selected.reduce(function (total, product) { return total + cleanPrice(product.price); }, 0);
+    var summary = box.querySelector(".tilda-product-addons__summary");
+    if (!summary) return;
+    summary.textContent = selected.length
+      ? "Выбрано: " + selected.length + ", к заказу +" + formatPrice(sum)
+      : "Допы не выбраны.";
+  }
+
+  function getSelectedAddonProducts(box) {
+    return qsa(box, ".tilda-product-addon-item__check:checked").map(function (input) {
+      var item = closest(input, ".tilda-product-addon-item");
+      return item ? getProductByUid(item.getAttribute("data-addon-uid")) : null;
+    }).filter(Boolean);
+  }
+
+  function bindBuyButton(popup) {
+    if (popup.dataset.tildaProductAddonsBuyBound === "1") return;
+    var button = popup.querySelector('.t-store__prod-popup__btn-wrapper a[href="#order"], .js-store-buttons-wrapper a[href="#order"], .t-store__prod-popup__btn');
+    if (!button) return;
+    button.addEventListener("click", onBuyClick, true);
+    popup.dataset.tildaProductAddonsBuyBound = "1";
+  }
+
+  function onBuyClick(event) {
+    var button = event.currentTarget;
+    if (button.classList.contains("t-store__prod-popup__btn_disabled")) return;
+
+    var popup = closest(button, ".t-store__product-popup, .t-store__product-snippet") || activePopup;
+    var box = popup && popup.querySelector(".tilda-product-addons");
+    var selected = box ? getSelectedAddonProducts(box) : [];
+    if (!selected.length) return;
+
+    if (Date.now() - batchStartedAt < 700) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    batchStartedAt = Date.now();
+
+    addMainAndAddonsToCart(popup, selected);
+  }
+
+  function getMainProductForCart(popup) {
+    var productNode = getPopupProductNode(popup);
+    if (!productNode) return null;
+    var product = null;
+    if (typeof window.t_store__collectProductDataByElement === "function") {
+      try { product = window.t_store__collectProductDataByElement(productNode); } catch (e) {}
+    }
+    if (!product) product = collectFromDomProduct(productNode);
+    if (!product) return null;
+    var quantityInput = productNode.querySelector(".t-store__prod__quantity-input");
+    var qty = quantityInput ? parseInt(quantityInput.value, 10) : 1;
+    if (!isNaN(qty) && qty > 1) product.quantity = qty;
+    return product;
+  }
+
+  function productForCart(product) {
+    return {
+      uid: product.uid,
+      name: product.name,
+      price: cleanPrice(product.price),
+      inv: product.inv == null ? "" : product.inv,
+      sku: product.sku || undefined,
+      img: product.img || undefined,
+      quantity: product.quantity || 1
+    };
+  }
+
+  function addMainAndAddonsToCart(popup, selected) {
+    if (typeof window.tcart__addProduct !== "function") {
+      alert("Корзина Тильды еще не загрузилась. Попробуйте еще раз через пару секунд.");
+      return;
+    }
+
+    var mainProduct = getMainProductForCart(popup);
+    if (!mainProduct || !mainProduct.uid) {
+      alert("Не удалось определить текущий товар.");
+      return;
+    }
+
+    var restoreCartOpen = setCartOpenOnOrder(false);
+    var ok;
+    try {
+      ok = window.tcart__addProduct(mainProduct);
+      if (ok === false) return;
+      selected.forEach(function (addon) {
+        window.tcart__addProduct(productForCart(addon));
+      });
+    } finally {
+      restoreCartOpen();
+    }
+
+    if (cfg.openCartAfterAdd !== false && typeof window.tcart__openCart === "function") {
+      setTimeout(function () { window.tcart__openCart(); }, 30);
+    }
+  }
+
+  function setCartOpenOnOrder(enabled) {
+    var cart = getCartNode();
+    var oldAttr = cart ? cart.getAttribute("data-opencart-onorder") : null;
+    if (cart) cart.setAttribute("data-opencart-onorder", enabled ? "yes" : "no");
+    return function () {
+      if (cart) {
+        if (oldAttr == null) cart.removeAttribute("data-opencart-onorder");
+        else cart.setAttribute("data-opencart-onorder", oldAttr);
+      }
+    };
+  }
+
+  function escapeHtml(value) {
+    return text(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function escapeAttr(value) {
+    return escapeHtml(value).replace(/`/g, "&#096;");
+  }
+
+  function exportProduct(product) {
+    return {
+      uid: product.uid,
+      name: product.name,
+      price: cleanPrice(product.price),
+      oldPrice: product.oldPrice || "",
+      sku: product.sku || "",
+      img: product.img || "",
+      inv: product.inv == null ? "" : product.inv,
+      characteristics: product.characteristics || []
+    };
+  }
+
+  function shouldScanAfterMutation(mutations) {
+    var i;
+    var j;
+    for (i = 0; i < mutations.length; i++) {
+      var mutation = mutations[i];
+      var nodes = Array.prototype.slice.call(mutation.addedNodes || [])
+        .concat(Array.prototype.slice.call(mutation.removedNodes || []));
+      for (j = 0; j < nodes.length; j++) {
+        var node = nodes[j];
+        if (!node || node.nodeType !== 1) continue;
+        if (node.classList && node.classList.contains("tilda-product-addons")) continue;
+        if (closest(node, ".tilda-product-addons")) continue;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  if (window.TILDA_PRODUCT_ADDONS_ENABLE_TEST_HOOKS) {
+    window.TILDA_PRODUCT_ADDONS_TEST_HOOKS = {
+      hydrateFromConfig: hydrateFromConfig,
+      indexProduct: indexProduct,
+      getProductByUid: getProductByUid,
+      getMissingProductUids: getMissingProductUids,
+      renderAddonRows: renderAddonRows
+    };
+  }
+
+  ready(function () {
+    hydrateFromConfig();
+    hydrateFromDom();
+    scanPopup();
+    if (cfg.catalogSources.length) {
+      setTimeout(function () {
+        ensureCatalogsLoaded(function () { scheduleScan(0); });
+      }, 80);
+    }
+
+    document.addEventListener("tStoreRendered", function () { scheduleScanBurst(120); }, true);
+    document.addEventListener("click", function (event) {
+      if (closest(event.target, ".tilda-product-addons")) return;
+      scheduleScanBurst(160);
+    }, true);
+    window.addEventListener("resize", function () { scheduleScanBurst(180); });
+    window.addEventListener("orientationchange", function () { scheduleScanBurst(220); });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", function () { scheduleScanBurst(220); });
+    }
+
+    if (window.MutationObserver) {
+      new MutationObserver(function (mutations) {
+        if (shouldScanAfterMutation(mutations)) scheduleScan(180);
+      }).observe(document.body || document.documentElement, {
+        childList: true,
+        subtree: true
+      });
+    }
+  });
+})();
+</script>
