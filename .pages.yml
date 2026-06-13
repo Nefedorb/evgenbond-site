@@ -75,6 +75,42 @@ content:
         type: boolean
         required: true
         default: true
+      - name: coverBorderWidth
+        label: Толщина рамки обложки, px
+        type: number
+        default: 1
+        options:
+          min: 1
+          max: 12
+      - name: coverBorderStyle
+        label: Стиль рамки обложки
+        type: select
+        default: solid
+        options:
+          values:
+            - name: solid
+              label: Сплошная
+            - name: dashed
+              label: Пунктирная
+            - name: dotted
+              label: Точечная
+            - name: double
+              label: Двойная
+      - name: coverBorderColor
+        label: Цвет рамки обложки
+        type: string
+        default: "#0D0D0D"
+        description: "HEX-цвет, например #C80000."
+        pattern:
+          regex: "^#[0-9A-Fa-f]{6}$"
+          message: "Введите HEX-цвет из 6 символов, например #C80000."
+      - name: coverBorderRadius
+        label: Скругление обложки, px
+        type: number
+        default: 0
+        options:
+          min: 0
+          max: 64
       - name: sharedImage
         label: Картинка shared link
         type: image
@@ -107,7 +143,10 @@ content:
                 options:
                   format: markdown
                   switcher: true
-                  media: false
+                  media: images
+                  path: assets/blog
+                  extensions: [jpg, jpeg, png, webp]
+                  rename: random
           - name: image
             label: Изображение
             fields:
@@ -128,6 +167,42 @@ content:
                 label: Показывать рамку
                 type: boolean
                 default: true
+              - name: borderWidth
+                label: Толщина рамки, px
+                type: number
+                default: 1
+                options:
+                  min: 1
+                  max: 12
+              - name: borderStyle
+                label: Стиль рамки
+                type: select
+                default: solid
+                options:
+                  values:
+                    - name: solid
+                      label: Сплошная
+                    - name: dashed
+                      label: Пунктирная
+                    - name: dotted
+                      label: Точечная
+                    - name: double
+                      label: Двойная
+              - name: borderColor
+                label: Цвет рамки
+                type: string
+                default: "#0D0D0D"
+                description: "HEX-цвет, например #C80000."
+                pattern:
+                  regex: "^#[0-9A-Fa-f]{6}$"
+                  message: "Введите HEX-цвет из 6 символов, например #C80000."
+              - name: borderRadius
+                label: Скругление, px
+                type: number
+                default: 0
+                options:
+                  min: 0
+                  max: 64
               - name: size
                 label: Размер
                 type: select

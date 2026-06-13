@@ -16,6 +16,7 @@ import {
   slugifyTag,
   toAbsoluteUrl
 } from "./content.mjs";
+import { getOptimizedImagePath } from "./images.mjs";
 
 marked.use({
   gfm: true,
@@ -268,6 +269,40 @@ function sanitizeArticleHtml(html) {
   });
 }
 
+function renderPictureImage({ src, alt, loading = "", className = "", style = "" }) {
+  const optimizedSrc = getOptimizedImagePath(src);
+  const imageAttributes = [
+    `src="${escapeHtml(src)}"`,
+    `alt="${escapeHtml(alt)}"`,
+    loading ? `loading="${loading}"` : "",
+    className ? `class="${escapeHtml(className)}"` : "",
+    style ? `style="${escapeHtml(style)}"` : ""
+  ].filter(Boolean).join(" ");
+  const image = `<img ${imageAttributes}>`;
+
+  if (!optimizedSrc) return image;
+
+  return `<picture><source type="image/webp" srcset="${escapeHtml(optimizedSrc)}">${image}</picture>`;
+}
+
+function enhanceArticleImages(html) {
+  return html.replace(/<img\b[^>]*\bsrc="([^"]+)"[^>]*>/gi, (image, src) => {
+    const optimizedSrc = getOptimizedImagePath(src);
+    if (!optimizedSrc) return image;
+
+    return `<picture class="article-inline-picture"><source type="image/webp" srcset="${escapeHtml(optimizedSrc)}">${image}</picture>`;
+  });
+}
+
+function getImageAppearanceStyle(appearance) {
+  return [
+    `--article-image-border-width:${appearance.borderWidth}px`,
+    `--article-image-border-style:${appearance.borderStyle}`,
+    `--article-image-border-color:${appearance.borderColor}`,
+    `--article-image-radius:${appearance.borderRadius}px`
+  ].join(";");
+}
+
 function renderCodeBlock(code, language = "", caption = "", isEscaped = false) {
   const labelParts = [language, caption].filter(Boolean);
   const label = labelParts.length ? labelParts.join(" // ") : "Код";
@@ -291,7 +326,7 @@ function enhanceCodeBlocks(html) {
 
 function renderMarkdownBlock(markdown) {
   const renderedMarkdown = marked.parse(markdown);
-  return enhanceCodeBlocks(sanitizeArticleHtml(renderedMarkdown));
+  return enhanceArticleImages(enhanceCodeBlocks(sanitizeArticleHtml(renderedMarkdown)));
 }
 
 function renderImageBlock(block) {
@@ -307,7 +342,12 @@ function renderImageBlock(block) {
 
   return `
                 <figure class="${classes}">
-                    <img src="${escapeHtml(block.image)}" alt="${escapeHtml(block.alt)}" loading="lazy">
+                    ${renderPictureImage({
+                      src: block.image,
+                      alt: block.alt,
+                      loading: "lazy",
+                      style: getImageAppearanceStyle(block)
+                    })}
                     ${caption}
                 </figure>`;
 }
@@ -567,7 +607,11 @@ export function renderBlogIndex(posts, {
     ? posts.map((post) => `
                 <article class="blog-card">
                     <a class="blog-card-media" href="/blog/${escapeHtml(post.slug)}/" aria-label="${escapeHtml(post.title)}">
-                        <img src="${escapeHtml(post.coverImage)}" alt="${escapeHtml(post.coverImageAlt)}" loading="lazy">
+                        ${renderPictureImage({
+                          src: post.coverImage,
+                          alt: post.coverImageAlt,
+                          loading: "lazy"
+                        })}
                     </a>
                     <div class="blog-card-body">
 ${renderCardMeta(post)}
@@ -629,7 +673,11 @@ export function renderPost(post) {
   const cover = post.showCoverInArticle
     ? `
             <div class="article-cover${post.showCoverBorder ? "" : " has-no-border"}">
-                <img src="${escapeHtml(post.coverImage)}" alt="${escapeHtml(post.coverImageAlt)}">
+                ${renderPictureImage({
+                  src: post.coverImage,
+                  alt: post.coverImageAlt,
+                  style: getImageAppearanceStyle(post.coverAppearance)
+                })}
             </div>`
     : "";
 

@@ -14,6 +14,8 @@
   `assets/site/home.css`.
 - Блог: Markdown-файлы в `content/blog/*.md`.
 - Изображения блога: `assets/blog/`.
+- JPEG/PNG блога автоматически получают WebP-варианты в `_site` через Sharp;
+  исходники остаются fallback и не переписываются.
 - CMS: Pages CMS, схема хранится в `.pages.yml`.
 - Вход в CMS: `admin/index.html`.
 - Генератор: `scripts/build-blog.mjs` и модули `scripts/blog/`.
@@ -67,6 +69,8 @@
 - `coverImage` используется в карточке и опционально внутри статьи.
 - `sharedImage` используется только для Open Graph и Twitter.
 - Пользовательский Markdown необходимо пропускать через sanitization.
+- Вставка изображений из буфера работает в rich-text блоках через media-источник
+  Pages CMS; индивидуальное оформление задаётся отдельным `image`-блоком.
 - Для внешнего видео разрешать только проверенные HTTPS embed URL.
 - Не коммитить `_site/`: он создаётся сборкой и публикуется GitHub Actions.
 

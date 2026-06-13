@@ -240,6 +240,46 @@ function requireString(value, sourceFile, fieldName) {
   return value.trim();
 }
 
+function normalizeNumber(value, fallback, min, max, sourceFile, fieldName) {
+  if (value === undefined || value === null || value === "") return fallback;
+
+  const normalized = Number(value);
+  if (!Number.isFinite(normalized) || normalized < min || normalized > max) {
+    throw new Error(`${sourceFile}: ${fieldName} должен быть числом от ${min} до ${max}`);
+  }
+
+  return normalized;
+}
+
+function normalizeBorderStyle(value, sourceFile, fieldName) {
+  const normalized = typeof value === "string" && value.trim() ? value.trim() : "solid";
+
+  if (!["solid", "dashed", "dotted", "double"].includes(normalized)) {
+    throw new Error(`${sourceFile}: ${fieldName} использует неизвестный стиль рамки ${normalized}`);
+  }
+
+  return normalized;
+}
+
+function normalizeBorderColor(value, sourceFile, fieldName) {
+  const normalized = typeof value === "string" && value.trim() ? value.trim() : "#0D0D0D";
+
+  if (!/^#[0-9a-f]{6}$/i.test(normalized)) {
+    throw new Error(`${sourceFile}: ${fieldName} должен быть HEX-цветом вида #0D0D0D`);
+  }
+
+  return normalized.toUpperCase();
+}
+
+function normalizeImageAppearance(data, sourceFile, fieldPrefix) {
+  return {
+    borderWidth: normalizeNumber(data.borderWidth, 1, 1, 12, sourceFile, `${fieldPrefix}.borderWidth`),
+    borderStyle: normalizeBorderStyle(data.borderStyle, sourceFile, `${fieldPrefix}.borderStyle`),
+    borderColor: normalizeBorderColor(data.borderColor, sourceFile, `${fieldPrefix}.borderColor`),
+    borderRadius: normalizeNumber(data.borderRadius, 0, 0, 64, sourceFile, `${fieldPrefix}.borderRadius`)
+  };
+}
+
 function validateDownload(downloadPath, sourceFile, fieldName) {
   const normalizedPath = requireString(downloadPath, sourceFile, fieldName);
 
@@ -333,6 +373,7 @@ function validateBlock(block, sourceFile, index) {
       alt: requireString(block.alt, sourceFile, `${blockPrefix}.alt`),
       caption: typeof block.caption === "string" ? block.caption.trim() : "",
       showBorder: block.showBorder !== false,
+      ...normalizeImageAppearance(block, sourceFile, blockPrefix),
       size
     };
   }
@@ -448,6 +489,12 @@ export function validatePost(frontmatter, rawBody, sourceFile) {
     coverImageAlt,
     showCoverInArticle: frontmatter.showCoverInArticle !== false,
     showCoverBorder: frontmatter.showCoverBorder !== false,
+    coverAppearance: normalizeImageAppearance({
+      borderWidth: frontmatter.coverBorderWidth,
+      borderStyle: frontmatter.coverBorderStyle,
+      borderColor: frontmatter.coverBorderColor,
+      borderRadius: frontmatter.coverBorderRadius
+    }, sourceFile, "coverImage"),
     sharedImage,
     sharedImageAlt: frontmatter.sharedImageAlt.trim(),
     tags,

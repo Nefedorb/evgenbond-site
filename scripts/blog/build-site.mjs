@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { DIST, POSTS_PER_PAGE, ROOT, SITE_META_SUFFIX } from "./config.mjs";
 import { collectTagGroups, readPosts } from "./content.mjs";
+import { optimizeBlogImages } from "./images.mjs";
 import { getTagPath, renderBlogIndex, renderPost } from "./render.mjs";
 import { writeSeoFiles } from "./seo.mjs";
 
@@ -123,10 +124,13 @@ async function writeBlog(posts) {
 export async function buildSite() {
   await ensureCleanDist();
   await copyPublicAssets();
+  const optimizedImages = await optimizeBlogImages();
 
   const posts = await readPosts();
   await writeBlog(posts);
   await writeSeoFiles(posts);
 
-  console.log(`Built ${posts.length} published blog post(s) into ${path.relative(ROOT, DIST)}`);
+  console.log(
+    `Built ${posts.length} published blog post(s) and ${optimizedImages.count} WebP image(s) into ${path.relative(ROOT, DIST)}`
+  );
 }

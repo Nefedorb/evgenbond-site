@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";
+import sharp from "sharp";
 import test, { after, before } from "node:test";
 import { buildSite } from "../scripts/blog/build-site.mjs";
 import { DIST, ROOT, SITE_URL } from "../scripts/blog/config.mjs";
 import { readPosts, slugifyTag, validatePost } from "../scripts/blog/content.mjs";
+import { getOptimizedImagePath } from "../scripts/blog/images.mjs";
 import { getBlogPagePath, getTagPath, renderBlogIndex, renderPost } from "../scripts/blog/render.mjs";
 
 let publishedPosts;
@@ -17,12 +19,21 @@ const DOWNLOAD_FIXTURES = [
   "notes.txt",
   "archive.zip"
 ];
+const IMAGE_FIXTURE_PATH = path.join(ROOT, "assets", "blog", "sharp-fixture.png");
 
 before(async () => {
   await fs.mkdir(DOWNLOAD_FIXTURE_DIRECTORY, { recursive: true });
   await Promise.all(DOWNLOAD_FIXTURES.map((fileName) =>
     fs.writeFile(path.join(DOWNLOAD_FIXTURE_DIRECTORY, fileName), `fixture:${fileName}`, "utf8")
   ));
+  await sharp({
+    create: {
+      width: 64,
+      height: 40,
+      channels: 4,
+      background: { r: 200, g: 0, b: 0, alpha: 1 }
+    }
+  }).png().toFile(IMAGE_FIXTURE_PATH);
   publishedPosts = await readPosts();
   await buildSite();
 });
@@ -32,6 +43,7 @@ after(async () => {
     fs.rm(path.join(DOWNLOAD_FIXTURE_DIRECTORY, fileName), { force: true })
   ));
   await fs.rm(path.join(DOWNLOAD_FIXTURE_DIRECTORY, "too-large.pdf"), { force: true });
+  await fs.rm(IMAGE_FIXTURE_PATH, { force: true });
   await buildSite();
 });
 
@@ -231,6 +243,51 @@ test("download validation rejects files larger than 20 MB", async () => {
   }
 });
 
+test("Sharp creates WebP variants and article images use them with fallback", async () => {
+  const publicImagePath = "/assets/blog/sharp-fixture.png";
+  const optimizedPublicPath = getOptimizedImagePath(publicImagePath);
+  const optimizedFilePath = localUrlToPath(optimizedPublicPath);
+  const metadata = await sharp(await fs.readFile(optimizedFilePath)).metadata();
+  const post = validatePost(createTestPostData([{
+    type: "image",
+    image: publicImagePath,
+    alt: "Красный тестовый прямоугольник",
+    caption: "Проверка WebP и оформления",
+    showBorder: true,
+    borderWidth: 4,
+    borderStyle: "dashed",
+    borderColor: "#c80000",
+    borderRadius: 18,
+    size: "normal"
+  }]), "", "image-options.md");
+  const html = renderPost(post);
+
+  assert.equal(optimizedPublicPath, "/assets/blog/sharp-fixture.png.webp");
+  assert.equal(metadata.format, "webp");
+  assert.equal(metadata.width, 64);
+  assert.equal(metadata.height, 40);
+  assert.match(html, /<picture><source type="image\/webp" srcset="\/assets\/blog\/sharp-fixture\.png\.webp">/);
+  assert.match(html, /src="\/assets\/blog\/sharp-fixture\.png"/);
+  assert.match(html, /--article-image-border-width:4px/);
+  assert.match(html, /--article-image-border-style:dashed/);
+  assert.match(html, /--article-image-border-color:#C80000/);
+  assert.match(html, /--article-image-radius:18px/);
+});
+
+test("image appearance validation rejects unsafe and out-of-range values", () => {
+  const validateAppearance = (overrides) => validatePost(createTestPostData([{
+    type: "image",
+    image: "/assets/blog/sharp-fixture.png",
+    alt: "Тест",
+    ...overrides
+  }]), "", "invalid-image-options.md");
+
+  assert.throws(() => validateAppearance({ borderWidth: 0 }), /borderWidth должен быть числом от 1 до 12/);
+  assert.throws(() => validateAppearance({ borderRadius: 65 }), /borderRadius должен быть числом от 0 до 64/);
+  assert.throws(() => validateAppearance({ borderColor: "red" }), /HEX-цветом/);
+  assert.throws(() => validateAppearance({ borderStyle: "groove" }), /неизвестный стиль рамки/);
+});
+
 test("public URL helpers remain stable", () => {
   assert.equal(getBlogPagePath(1), "/blog/");
   assert.equal(getBlogPagePath(3), "/blog/page/3/");
@@ -385,4 +442,10 @@ test("required local CSS, fonts, images, and scripts are published", async () =>
       `Missing published download fixture ${fileName}`
     );
   }
+
+  assert.equal(
+    await pathExists(path.join(DIST, "assets", "blog", "sharp-fixture.png.webp")),
+    true,
+    "Missing generated WebP fixture"
+  );
 });

@@ -97,6 +97,9 @@
     overflow: hidden;
     background: var(--white);
 }
+.blog-card-media picture {
+    display: contents;
+}
 .blog-card-media img {
     width: 100%;
     aspect-ratio: 40 / 21;
@@ -244,7 +247,10 @@
     width: 100%;
     max-width: 1120px;
     height: auto;
-    border: var(--border);
+    border-width: var(--article-image-border-width, 1px);
+    border-style: var(--article-image-border-style, solid);
+    border-color: var(--article-image-border-color, var(--black));
+    border-radius: var(--article-image-radius, 0);
     display: block;
     margin: 0 auto;
 }
@@ -291,8 +297,21 @@
 .article-image-block img {
     width: 100%;
     height: auto;
-    border: var(--border);
+    border-width: var(--article-image-border-width, 1px);
+    border-style: var(--article-image-border-style, solid);
+    border-color: var(--article-image-border-color, var(--black));
+    border-radius: var(--article-image-radius, 0);
     display: block;
+}
+.article-cover picture,
+.article-image-block picture,
+.article-inline-picture {
+    display: block;
+}
+.article-text-block img {
+    display: block;
+    max-width: 100%;
+    height: auto;
 }
 .article-image-block.has-no-border img {
     border: 0;
