@@ -16,6 +16,7 @@ export async function writeSeoFiles(posts) {
   const sitemapEntries = [
     renderSitemapEntry("/"),
     renderSitemapEntry("/razrabotka-sajtov/"),
+    renderSitemapEntry("/web-design/"),
     renderSitemapEntry("/cookie-policy/"),
     renderSitemapEntry("/blog/", newestPostDate)
   ];

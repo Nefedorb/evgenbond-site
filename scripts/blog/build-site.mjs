@@ -38,7 +38,7 @@ async function copyDirectory(source, target) {
 
 async function copyPublicAssets() {
   const entries = await fs.readdir(ROOT, { withFileTypes: true });
-  const publicDirectories = new Set(["assets", "admin", "cookie-policy", "razrabotka-sajtov"]);
+  const publicDirectories = new Set(["assets", "admin", "cookie-policy", "razrabotka-sajtov", "web-design"]);
 
   for (const entry of entries) {
     const sourcePath = path.join(ROOT, entry.name);
