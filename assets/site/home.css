@@ -224,6 +224,8 @@
     transition: var(--transition-fast); position: relative; background: var(--white);
 }
 .service-col:last-child { border-right: none; }
+.service-col h3 a { color: inherit; text-underline-offset: 0.16em; }
+.service-col h3 a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
 
 .service-col:hover { background: var(--black); color: var(--white); }
 .service-col:hover p { color: var(--gray-light); }

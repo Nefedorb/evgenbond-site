@@ -15,6 +15,7 @@ export async function writeSeoFiles(posts) {
   const newestPostDate = posts[0]?.dateIso.slice(0, 10) || "";
   const sitemapEntries = [
     renderSitemapEntry("/"),
+    renderSitemapEntry("/razrabotka-sajtov/"),
     renderSitemapEntry("/cookie-policy/"),
     renderSitemapEntry("/blog/", newestPostDate)
   ];
