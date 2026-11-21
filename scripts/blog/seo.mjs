@@ -17,6 +17,7 @@ export async function writeSeoFiles(posts) {
     renderSitemapEntry("/"),
     renderSitemapEntry("/razrabotka-sajtov/"),
     renderSitemapEntry("/web-design/"),
+    renderSitemapEntry("/seo-prodvizhenie/"),
     renderSitemapEntry("/cookie-policy/"),
     renderSitemapEntry("/blog/", newestPostDate)
   ];
