@@ -53,6 +53,7 @@ async function copyPublicAssets() {
 
     const isPublicFile =
       entry.name === "index.html" ||
+      entry.name === "404.html" ||
       entry.name === "CNAME" ||
       /\.(jpe?g|png|webp|gif|svg|ico)$/i.test(entry.name);
 

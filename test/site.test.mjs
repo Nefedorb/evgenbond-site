@@ -338,6 +338,16 @@ test("robots and sitemap expose only public generated pages", async () => {
   }
 });
 
+test("the custom 404 is included at the hosting root and excluded from indexing", async () => {
+  const [html, sitemap] = await Promise.all([
+    fs.readFile(path.join(DIST, "404.html"), "utf8"),
+    fs.readFile(path.join(DIST, "sitemap.xml"), "utf8")
+  ]);
+
+  assert.match(html, /<meta name="robots" content="noindex">/);
+  assert.doesNotMatch(sitemap, /\/404\.html<\/loc>/);
+});
+
 test("all local HTML links and resources resolve", async () => {
   const htmlFiles = (await listFiles(DIST)).filter((file) => file.endsWith(".html"));
 
